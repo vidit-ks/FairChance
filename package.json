@@ -1,5 +1,4 @@
-{
-  "dependencies": {
-    "react-router-dom": "^7.13.2"
-  }
+"scripts": {
+  "dev": "nodemon src/index.js",
+  "start": "node src/index.js"
 }
