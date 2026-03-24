@@ -8,7 +8,7 @@ function Admin() {
 
   const fetchLatestDraw = async () => {
     try {
-      const res = await fetch("https://fairchance-backend.onrender.com");
+      const res = await fetch("https://fairchance-backend.onrender.com/api/draws/latest");
       const data = await res.json();
       setLatestDraw(data);
     } catch (error) {
@@ -18,7 +18,7 @@ function Admin() {
 
   const fetchLatestResults = async () => {
     try {
-      const res = await fetch("https://fairchance-backend.onrender.com");
+      const res = await fetch("https://fairchance-backend.onrender.com/api/draws/results/latest");
       const data = await res.json();
       setResults(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -33,7 +33,7 @@ function Admin() {
 
   const handleRunDraw = async () => {
     try {
-      const res = await fetch("https://fairchance-backend.onrender.com", {
+      const res = await fetch("https://fairchance-backend.onrender.com/api/draws/runs", {
         method: "POST",
       });
 
