@@ -13,7 +13,7 @@ const [charityId, setCharityId] = useState("");
 
 const fetchCharities = async () => {
   try {
-    const res = await fetch("http://localhost:5000/api/charities");
+    const res = await fetch("https://fairchance-backend.onrender.com");
     const data = await res.json();
     setCharities(Array.isArray(data) ? data : []);
   } catch (error) {
@@ -29,7 +29,7 @@ const handleSelectCharity = async () => {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/charities/select", {
+    const res = await fetch("https://fairchance-backend.onrender.com", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -57,7 +57,7 @@ const handleSelectCharity = async () => {
 
   const fetchScores = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/scores/${user.id}`);
+      const res = await fetch(`https://fairchance-backend.onrender.com/api/scores/${user.id}`);
       const data = await res.json();
       setScores(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -67,7 +67,7 @@ const handleSelectCharity = async () => {
 
   const fetchSelectedCharity = async () => {
   try {
-    const res = await fetch(`http://localhost:5000/api/charities/selected/${user.id}`);
+    const res = await fetch(`https://fairchance-backend.onrender.com/api/charities/selected/${user.id}`);
     const data = await res.json();
     setSelectedCharity(data?.charities || null);
   } catch (error) {
@@ -77,7 +77,7 @@ const handleSelectCharity = async () => {
 
   const fetchSubscription = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/subscriptions/${user.id}`);
+      const res = await fetch(`https://fairchance-backend.onrender.com/api/subscriptions/${user.id}`);
       const data = await res.json();
       setSubscription(data);
     } catch (error) {
@@ -100,7 +100,7 @@ const handleSelectCharity = async () => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:5000/api/scores", {
+      const res = await fetch("https://fairchance-backend.onrender.com/api/scores", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -130,7 +130,7 @@ const handleSelectCharity = async () => {
 
   const handleSubscribe = async (planType) => {
     try {
-      const res = await fetch("http://localhost:5000/api/subscriptions", {
+      const res = await fetch("https://fairchance-backend.onrender.com/api/subscriptions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
