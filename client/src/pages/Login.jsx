@@ -35,7 +35,7 @@ const handleSubmit = async (e) => {
 
     const role = String(data.user?.role || "").trim().toLowerCase();
 
-    alert("ROLE = " + role);
+    //alert("ROLE = " + role);
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
