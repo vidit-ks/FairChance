@@ -6,13 +6,13 @@ function Charities() {
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    fetch("https://fairchance-backend.onrender.com")
+    fetch("https://fairchance-backend.onrender.com/api/charities")
       .then(res => res.json())
       .then(data => setCharities(data));
   }, []);
 
   const selectCharity = async (id) => {
-    await fetch("https://fairchance-backend.onrender.com", {
+    await fetch("https://fairchance-backend.onrender.com/api/charities/select", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
