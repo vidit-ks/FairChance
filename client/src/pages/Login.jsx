@@ -18,7 +18,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   try {
-    const res = await fetch("https://fairchance-backend.onrender.com", {
+    const res = await fetch("https://fairchance-backend.onrender.com/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
