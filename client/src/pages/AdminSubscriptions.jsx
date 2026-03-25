@@ -53,9 +53,10 @@ function AdminSubscriptions() {
                   <tr className="border-b border-slate-200 text-left">
                     <th className="py-3 px-2">User</th>
                     <th className="py-3 px-2">Email</th>
-                    <th className="py-3 px-2">Plan</th>
+                    <th className="py-3 px-2">Plan Type</th>
                     <th className="py-3 px-2">Status</th>
-                    <th className="py-3 px-2">Start Date</th>
+                    <th className="py-3 px-2">Renewal Date</th>
+                    <th className="py-3 px-2">Created</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -67,13 +68,18 @@ function AdminSubscriptions() {
                       <td className="py-3 px-2 text-slate-600">
                         {sub.users?.email || "N/A"}
                       </td>
-                      <td className="py-3 px-2 text-slate-600">
-                        {sub.plan || sub.plan_name || "Standard"}
+                      <td className="py-3 px-2 text-slate-600 capitalize">
+                        {sub.plan_type || "N/A"}
                       </td>
                       <td className="py-3 px-2">
                         <span className="inline-block rounded-full bg-green-100 text-green-700 px-3 py-1 text-sm">
                           {sub.status || "active"}
                         </span>
+                      </td>
+                      <td className="py-3 px-2 text-slate-600">
+                        {sub.renewal_date
+                          ? new Date(sub.renewal_date).toLocaleDateString()
+                          : "N/A"}
                       </td>
                       <td className="py-3 px-2 text-slate-500">
                         {sub.created_at
