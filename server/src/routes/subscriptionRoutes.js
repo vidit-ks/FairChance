@@ -1,11 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const {
-  createSubscription,
-  getSubscription,
-} = require("../controllers/subscriptionController");
+const { getAllSubscriptions } = require("../controllers/subscriptionController");
 
-router.post("/", createSubscription);
-router.get("/:userId", getSubscription);
+// other routes...
+router.get("/all", getAllSubscriptions);
 
 module.exports = router;
