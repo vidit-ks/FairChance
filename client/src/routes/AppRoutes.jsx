@@ -7,6 +7,9 @@ import Charities from "../pages/Charities";
 import Admin from "../pages/Admin";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
+import Admin from "./pages/Admin";
+import AdminUsers from "./pages/AdminUsers";
+import AdminSubscriptions from "./pages/AdminSubscriptions";
 
 function AppRoutes() {
   return (
@@ -16,6 +19,9 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/charities" element={<Charities />} />
+        <Route path="/admin" element={<Admin />} />
+<Route path="/admin/users" element={<AdminUsers />} />
+<Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
 
         <Route
           path="/dashboard"
