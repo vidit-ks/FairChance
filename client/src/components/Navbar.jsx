@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
+import { getNormalizedRole } from "../utils/getRole";
 
 function Navbar() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+  const role = getNormalizedRole();
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -28,25 +30,19 @@ function Navbar() {
           </>
         )}
 
-        {user && user.role === "admin" && (
+        {user && role === "admin" && (
           <>
             <Link to="/admin" className="hover:text-blue-600">Admin</Link>
-            <button
-              onClick={handleLogout}
-              className="text-red-600 font-medium"
-            >
+            <button onClick={handleLogout} className="text-red-600 font-medium">
               Logout
             </button>
           </>
         )}
 
-        {user && user.role !== "admin" && (
+        {user && role !== "admin" && (
           <>
             <Link to="/dashboard" className="hover:text-blue-600">Dashboard</Link>
-            <button
-              onClick={handleLogout}
-              className="text-red-600 font-medium"
-            >
+            <button onClick={handleLogout} className="text-red-600 font-medium">
               Logout
             </button>
           </>
