@@ -33,11 +33,14 @@ function Admin() {
 
   const handleRunDraw = async () => {
     try {
+      console.log("Run Draw clicked");
+
       const res = await fetch("https://fairchance-backend.onrender.com/api/draws/runs", {
         method: "POST",
       });
 
       const data = await res.json();
+      console.log("Run draw response:", data);
 
       if (!res.ok) {
         alert(data.message || "Failed to run draw");
@@ -83,13 +86,18 @@ function Admin() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-md p-6">
-          <h2 className="text-2xl font-semibold mb-4">Monthly Draw</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-semibold">Monthly Draw</h2>
 
-          const handleRunDraw = async () => {
-  console.log("Run Draw clicked");
-};
+            <button
+              onClick={handleRunDraw}
+              className="bg-slate-900 text-white px-5 py-2 rounded-lg hover:bg-slate-700 transition"
+            >
+              Run Draw
+            </button>
+          </div>
 
-          {latestDraw ? (
+          {latestDraw && Array.isArray(latestDraw.draw_numbers) ? (
             <div>
               <h3 className="text-lg font-semibold mb-3">Latest Draw Numbers</h3>
 
