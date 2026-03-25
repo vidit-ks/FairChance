@@ -35,7 +35,7 @@ function Admin() {
   try {
     console.log("Run Draw clicked");
 
-    const res = await fetch("https://fairchance-backend.onrender.com/api/draws/runs", {
+    const res = await fetch("https://fairchance-backend.onrender.com/api/draws/run", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
