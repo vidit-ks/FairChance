@@ -42,9 +42,9 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       if (role === "admin") {
-        navigate("/admin");
+        navigate("/admin", { replace: true });
       } else {
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
     } catch (error) {
       console.log(error);
