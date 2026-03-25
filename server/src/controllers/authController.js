@@ -106,9 +106,10 @@ const getAllUsers = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("users")
-      .select("id, name, email, role, created_at");
+      .select("*");
 
     if (error) {
+      console.error("Supabase getAllUsers error:", error);
       return res.status(500).json({
         success: false,
         message: error.message,
@@ -123,7 +124,7 @@ const getAllUsers = async (req, res) => {
     console.error("Get all users error:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch users",
+      message: error.message || "Failed to fetch users",
     });
   }
 };
