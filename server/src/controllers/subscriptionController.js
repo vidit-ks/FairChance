@@ -1,3 +1,5 @@
+const supabase = require("../config/supabaseClient");
+
 const getAllSubscriptions = async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -33,7 +35,5 @@ const getAllSubscriptions = async (req, res) => {
 };
 
 module.exports = {
-  createSubscription,
-  getSubscriptionById,
   getAllSubscriptions,
 };
