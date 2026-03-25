@@ -106,7 +106,7 @@ const getAllUsers = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("users")
-      .select("*");
+      .select("id, name, email, role, created_at, charity_id");
 
     if (error) {
       console.error("Supabase getAllUsers error:", error);
@@ -116,9 +116,14 @@ const getAllUsers = async (req, res) => {
       });
     }
 
+    const cleanedUsers = (data || []).map((user) => ({
+      ...user,
+      role: user.role ? user.role.trim() : "subscriber",
+    }));
+
     return res.status(200).json({
       success: true,
-      users: data,
+      users: cleanedUsers,
     });
   } catch (error) {
     console.error("Get all users error:", error);
@@ -128,5 +133,4 @@ const getAllUsers = async (req, res) => {
     });
   }
 };
-
 module.exports = { signup, login, getAllUsers };
