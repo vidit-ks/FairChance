@@ -43,29 +43,22 @@ function Admin() {
     });
 
     const text = await res.text();
-    console.log("Raw response:", text);
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { message: text };
-    }
-
     console.log("Status:", res.status);
-    console.log("Parsed response:", data);
+    console.log("Response text:", text);
 
     if (!res.ok) {
-      alert(data.message || `Failed to run draw (Status ${res.status})`);
+      alert(`Failed to run draw. Status: ${res.status}`);
       return;
     }
+
+    const data = JSON.parse(text);
 
     setLatestDraw(data.draw);
     await fetchLatestResults();
     alert("Draw created successfully");
   } catch (error) {
     console.log("Run draw error:", error);
-    alert(`Failed to run draw: ${error.message}`);
+    alert("Failed to run draw");
   }
 };
 
