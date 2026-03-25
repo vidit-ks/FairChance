@@ -96,11 +96,11 @@ function Admin() {
             <h2 className="text-2xl font-semibold">Monthly Draw</h2>
 
             <button
-              onClick={handleRunDraw}
-              className="bg-slate-900 text-white px-5 py-2 rounded-lg hover:bg-slate-700 transition"
-            >
-              Run Draw
-            </button>
+  onClick={handleRunDraw}
+  className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+>
+  Run Draw
+</button>
           </div>
 
           {latestDraw && Array.isArray(latestDraw.draw_numbers) ? (
