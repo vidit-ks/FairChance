@@ -3,9 +3,9 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
-import ProtectedRoute from "./ProtectedRoute";
 import Charities from "../pages/Charities";
 import Admin from "../pages/Admin";
+import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
 
 function AppRoutes() {
