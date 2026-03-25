@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -14,43 +17,40 @@ function Login() {
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const res = await fetch("https://fairchance-backend.onrender.com/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch("https://fairchance-backend.onrender.com/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      alert(data.message || "Login failed");
-      return;
+      if (!res.ok) {
+        alert(data.message || "Login failed");
+        return;
+      }
+
+      const role = String(data.user?.role || "").trim().toLowerCase();
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      if (role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.log(error);
+      alert("Login failed");
     }
-
-    const role = String(data.user?.role || "").trim().toLowerCase();
-
-    //alert("ROLE = " + role);
-
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-
-    if (role === "admin") {
-      window.location.replace("/admin");
-      return;
-    }
-
-    window.location.replace("/dashboard");
-  } catch (error) {
-    console.log(error);
-    alert("Login failed");
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
