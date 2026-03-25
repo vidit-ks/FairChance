@@ -28,14 +28,21 @@ function Navbar() {
           </>
         )}
 
-        {user && (
+        {user && user.role === "admin" && (
+          <>
+            <Link to="/admin" className="hover:text-blue-600">Admin</Link>
+            <button
+              onClick={handleLogout}
+              className="text-red-600 font-medium"
+            >
+              Logout
+            </button>
+          </>
+        )}
+
+        {user && user.role !== "admin" && (
           <>
             <Link to="/dashboard" className="hover:text-blue-600">Dashboard</Link>
-
-            {user.role === "admin" && (
-              <Link to="/admin" className="hover:text-blue-600">Admin</Link>
-            )}
-
             <button
               onClick={handleLogout}
               className="text-red-600 font-medium"
