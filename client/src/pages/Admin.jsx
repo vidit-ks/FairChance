@@ -35,7 +35,7 @@ function Admin() {
 
   const handleRunDraw = async () => {
     try {
-      const res = await fetch("https://fairchance-backend.onrender.com/api/draws/runs", {
+      const res = await fetch("https://fairchance-backend.onrender.com/api/draws/run", {
         method: "POST",
       });
 
