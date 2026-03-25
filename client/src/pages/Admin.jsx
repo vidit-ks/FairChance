@@ -32,29 +32,42 @@ function Admin() {
   }, []);
 
   const handleRunDraw = async () => {
+  try {
+    console.log("Run Draw clicked");
+
+    const res = await fetch("https://fairchance-backend.onrender.com/api/draws/runs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const text = await res.text();
+    console.log("Raw response:", text);
+
+    let data;
     try {
-      console.log("Run Draw clicked");
-
-      const res = await fetch("https://fairchance-backend.onrender.com/api/draws/runs", {
-        method: "POST",
-      });
-
-      const data = await res.json();
-      console.log("Run draw response:", data);
-
-      if (!res.ok) {
-        alert(data.message || "Failed to run draw");
-        return;
-      }
-
-      setLatestDraw(data.draw);
-      await fetchLatestResults();
-      alert("Draw created successfully");
-    } catch (error) {
-      console.log(error);
-      alert("Failed to run draw");
+      data = JSON.parse(text);
+    } catch {
+      data = { message: text };
     }
-  };
+
+    console.log("Status:", res.status);
+    console.log("Parsed response:", data);
+
+    if (!res.ok) {
+      alert(data.message || `Failed to run draw (Status ${res.status})`);
+      return;
+    }
+
+    setLatestDraw(data.draw);
+    await fetchLatestResults();
+    alert("Draw created successfully");
+  } catch (error) {
+    console.log("Run draw error:", error);
+    alert(`Failed to run draw: ${error.message}`);
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50">
