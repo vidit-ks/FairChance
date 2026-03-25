@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { supabase } = require("../config/supabaseClient");
+const supabase = require("../config/supabaseClient");
 
 const signup = async (req, res) => {
   try {
