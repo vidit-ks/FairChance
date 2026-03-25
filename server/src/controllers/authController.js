@@ -1,7 +1,6 @@
-import { supabase } from "../config/supabaseClient.js";
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const supabase = require("../config/supabaseClient");
+const { supabase } = require("../config/supabaseClient");
 
 const signup = async (req, res) => {
   try {
@@ -103,7 +102,7 @@ const login = async (req, res) => {
   }
 };
 
-export const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("users")
@@ -129,4 +128,4 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-module.exports = { signup, login };
+module.exports = { signup, login, getAllUsers };
