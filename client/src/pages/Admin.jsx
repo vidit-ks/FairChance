@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 function Admin() {
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const [latestDraw, setLatestDraw] = useState(null);
   const [results, setResults] = useState([]);
@@ -32,35 +34,37 @@ function Admin() {
   }, []);
 
   const handleRunDraw = async () => {
-  try {
-    console.log("Run Draw clicked");
+    try {
+      const res = await fetch("https://fairchance-backend.onrender.com/api/draws/runs", {
+        method: "POST",
+      });
 
-    const res = await fetch("https://fairchance-backend.onrender.com/api/draws/run", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+      const text = await res.text();
+      console.log("Status:", res.status);
+      console.log("Response text:", text);
 
-    const text = await res.text();
-    console.log("Status:", res.status);
-    console.log("Response text:", text);
+      if (!res.ok) {
+        alert(`Failed to run draw. Status: ${res.status}`);
+        return;
+      }
 
-    if (!res.ok) {
-      alert(`Failed to run draw. Status: ${res.status}`);
-      return;
+      const data = JSON.parse(text);
+
+      setLatestDraw(data.draw);
+      await fetchLatestResults();
+      alert("Draw created successfully");
+    } catch (error) {
+      console.log(error);
+      alert("Failed to run draw");
     }
+  };
 
-    const data = JSON.parse(text);
-
-    setLatestDraw(data.draw);
-    await fetchLatestResults();
-    alert("Draw created successfully");
-  } catch (error) {
-    console.log("Run draw error:", error);
-    alert("Failed to run draw");
-  }
-};
+  const goToDrawSection = () => {
+    const section = document.getElementById("draw-section");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -75,32 +79,41 @@ function Admin() {
         </p>
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-md p-6">
+          <div
+            onClick={() => navigate("/admin/users")}
+            className="bg-white rounded-2xl shadow-md p-6 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition"
+          >
             <h2 className="text-lg font-semibold mb-2">Users</h2>
             <p className="text-slate-600">Manage all platform users</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-md p-6">
+          <div
+            onClick={() => navigate("/admin/subscriptions")}
+            className="bg-white rounded-2xl shadow-md p-6 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition"
+          >
             <h2 className="text-lg font-semibold mb-2">Subscriptions</h2>
             <p className="text-slate-600">View subscription activity</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-md p-6">
+          <div
+            onClick={goToDrawSection}
+            className="bg-white rounded-2xl shadow-md p-6 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition"
+          >
             <h2 className="text-lg font-semibold mb-2">Draw System</h2>
             <p className="text-slate-600">Run and manage monthly draws</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-md p-6">
+        <div id="draw-section" className="bg-white rounded-2xl shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-semibold">Monthly Draw</h2>
 
             <button
-  onClick={handleRunDraw}
-  className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
->
-  Run Draw
-</button>
+              onClick={handleRunDraw}
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              Run Draw
+            </button>
           </div>
 
           {latestDraw && Array.isArray(latestDraw.draw_numbers) ? (
