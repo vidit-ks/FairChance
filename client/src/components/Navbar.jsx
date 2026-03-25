@@ -1,11 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
   const handleLogout = () => {
     localStorage.clear();
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   return (
@@ -15,7 +16,6 @@ function Navbar() {
       <div className="flex gap-6 items-center">
         <Link to="/" className="hover:text-blue-600">Home</Link>
 
-        {/* If NOT logged in */}
         {!user && (
           <>
             <Link to="/login" className="hover:text-blue-600">Login</Link>
@@ -28,7 +28,6 @@ function Navbar() {
           </>
         )}
 
-        {/* If logged in */}
         {user && (
           <>
             <Link to="/dashboard" className="hover:text-blue-600">Dashboard</Link>
