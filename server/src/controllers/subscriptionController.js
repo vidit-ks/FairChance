@@ -31,3 +31,9 @@ const getAllSubscriptions = async (req, res) => {
     });
   }
 };
+
+module.exports = {
+  createSubscription,
+  getSubscriptionById,
+  getAllSubscriptions,
+};
