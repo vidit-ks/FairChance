@@ -1,3 +1,4 @@
+import { supabase } from "../config/supabaseClient.js";
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const supabase = require("../config/supabaseClient");
@@ -99,6 +100,32 @@ const login = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Login failed", error: error.message });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, email, role, created_at");
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      users: data,
+    });
+  } catch (error) {
+    console.error("Get all users error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch users",
+    });
   }
 };
 
