@@ -131,23 +131,31 @@ const modifySubscription = async (req, res) => {
 
 const getAllSubscriptions = async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { data: subs, error: subsError } = await supabase
       .from("subscriptions")
-      .select(`
-        *,
-        users (
-          id,
-          name,
-          email
-        )
-      `)
+      .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (subsError) throw subsError;
+
+    // Fetch users manually to avoid foreign key/embedding errors in Supabase
+    const { data: users, error: usersError } = await supabase
+      .from("users")
+      .select("id, name, email");
+
+    if (usersError) throw usersError;
+
+    const userMap = {};
+    users?.forEach(u => { userMap[u.id] = u; });
+
+    const subscriptionsWithUsers = subs?.map(sub => ({
+      ...sub,
+      users: userMap[sub.user_id] || { name: 'Unknown User' }
+    })) || [];
 
     return res.status(200).json({
       success: true,
-      subscriptions: data || [],
+      subscriptions: subscriptionsWithUsers,
     });
   } catch (error) {
     console.error("Get all subscriptions error:", error);
@@ -185,12 +193,16 @@ const requestOfflineSubscription = async (req, res) => {
         user_id: userId,
         status: "pending_approval",
         plan_id: plan_id,
-        notes: note
+        notes: note,
+        renewal_date: new Date().toISOString()
       }])
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+       console.error("Insert subscription request schema error:", error);
+       throw error;
+    }
     res.status(201).json({ message: "Offline access request sent successfully.", subscription: sub });
   } catch (error) {
     res.status(500).json({ message: "Failed to request offline subscription", error: error.message });

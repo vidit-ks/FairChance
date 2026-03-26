@@ -23,7 +23,8 @@ const createSubscription = async (req, res) => {
         user_id: userId, 
         status: "pending_payment",
         plan_id: plan_id,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        renewal_date: new Date().toISOString()
       }])
       .select()
       .single();

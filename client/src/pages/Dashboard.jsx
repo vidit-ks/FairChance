@@ -77,7 +77,20 @@ function Dashboard() {
   const handleAddScore = async (e) => {
     e.preventDefault();
     if (!subscription || subscription.status !== "active") {
-      return toast.error("You need an active subscription to add scores.");
+      if (!dateInput) return toast.error("Please provide the date you played.");
+      
+      const tempScore = {
+        id: `temp-${Date.now()}`,
+        score: scoreInput,
+        played_at: dateInput,
+        isTemp: true
+      };
+      
+      setScores(prev => [tempScore, ...prev]);
+      setScoreInput("");
+      setDateInput("");
+      toast.success("Score added temporarily. It will only be permanently recorded when your subscription is active.");
+      return;
     }
 
     try {
@@ -246,7 +259,7 @@ function Dashboard() {
                         </div>
                         
                         <div className="p-3 bg-fc-charcoal-dark border border-fc-charcoal-light rounded flex flex-col gap-2">
-                          <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Manual Offline Access</p>
+                          <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Manual Subscription Request</p>
                           <button onClick={() => setShowOfflineModal(true)} className="bg-fc-charcoal-light border border-fc-gold text-fc-gold hover:bg-fc-gold/10 w-full py-2 rounded-lg font-medium transition-colors">Request Admin Approval</button>
                         </div>
                       </div>
@@ -372,15 +385,13 @@ function Dashboard() {
                 placeholder="Stableford (1-45)" 
                 value={scoreInput} onChange={(e) => setScoreInput(e.target.value)}
                 className="input-premium flex-1"
-                disabled={!isActive}
               />
               <input 
                 type="date" required
                 value={dateInput} onChange={(e) => setDateInput(e.target.value)}
                 className="input-premium sm:w-48"
-                disabled={!isActive}
               />
-              <button type="submit" disabled={!isActive} className="btn-primary flex items-center justify-center gap-2">
+              <button type="submit" className="btn-primary flex items-center justify-center gap-2">
                 {editingScoreId ? <Edit2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />} 
                 {editingScoreId ? "Update Slot" : "Add Slot"}
               </button>
@@ -398,7 +409,9 @@ function Dashboard() {
                       <span className="text-xl font-bold text-fc-white">{item.score}</span>
                     </div>
                     <div>
-                      <p className="text-sm text-fc-warm-white">Registered Number</p>
+                      <p className="text-sm text-fc-warm-white flex items-center gap-2">
+                        Registered Number {item.isTemp && <span className="bg-yellow-500/20 text-yellow-500 text-[10px] px-2 py-0.5 rounded font-bold">TEMP</span>}
+                      </p>
                       <p className="text-xs text-gray-500">Played on {new Date(item.played_at).toLocaleDateString()}</p>
                     </div>
                   </div>
@@ -430,7 +443,7 @@ function Dashboard() {
       {showOfflineModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="premium-card p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold text-white mb-2">Request Offline Access</h2>
+            <h2 className="text-xl font-bold text-white mb-2">Request Manual Subscription</h2>
             <p className="text-sm text-gray-400 mb-6">If you paid via cash, UPI direct transfer, or another manual method, provide the details below so the Admin can manually unlock your account.</p>
             
             <form onSubmit={handleOfflineRequest} className="space-y-4">
