@@ -1,0 +1,129 @@
+const supabase = require("../config/supabaseClient");
+
+const createSubscription = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // const { plan_id, payment_method_id } = req.body; // Mocked for now
+
+    // Check if user already has an active subscription
+    const { data: existing, error: checkError } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (checkError) throw checkError;
+    if (existing) {
+      return res.status(400).json({ message: "User already has an active subscription." });
+    }
+
+    const renewalDate = new Date();
+    renewalDate.setMonth(renewalDate.getMonth() + 1);
+
+    const { data: sub, error: insertError } = await supabase
+      .from("subscriptions")
+      .insert([{
+        user_id: userId,
+        status: "active",
+        renewal_date: renewalDate,
+      }])
+      .select()
+      .single();
+
+    if (insertError) throw insertError;
+
+    res.status(201).json({ message: "Subscription created successfully", subscription: sub });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create subscription", error: error.message });
+  }
+};
+
+const getUserSubscription = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (req.user.id !== userId && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const { data: subscription, error } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    res.status(200).json({ subscription: subscription || null });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch subscription", error: error.message });
+  }
+};
+
+const cancelSubscription = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verify ownership or admin
+    const { data: sub } = await supabase.from("subscriptions").select("user_id").eq("id", id).single();
+    if (!sub) return res.status(404).json({ message: "Subscription not found" });
+    if (req.user.id !== sub.user_id && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const { data: updatedSub, error } = await supabase
+      .from("subscriptions")
+      .update({
+        status: "cancelled",
+        cancelled_at: new Date(),
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json({ message: "Subscription cancelled successfully", subscription: updatedSub });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to cancel subscription", error: error.message });
+  }
+};
+
+const getAllSubscriptions = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("subscriptions")
+      .select(`
+        *,
+        users (
+          id,
+          name,
+          email
+        )
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return res.status(200).json({
+      success: true,
+      subscriptions: data || [],
+    });
+  } catch (error) {
+    console.error("Get all subscriptions error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch subscriptions",
+    });
+  }
+};
+
+module.exports = {
+  createSubscription,
+  getUserSubscription,
+  cancelSubscription,
+  getAllSubscriptions,
+};

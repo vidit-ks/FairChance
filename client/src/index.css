@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-fc-charcoal-dark text-fc-warm-white font-sans antialiased selection:bg-fc-emerald selection:text-white;
+  }
+}
+
+@layer components {
+  /* Premium Card Styles */
+  .premium-card {
+    @apply bg-fc-charcoal rounded-2xl border border-fc-charcoal-light shadow-xl overflow-hidden relative;
+  }
+  
+  .premium-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-300 pointer-events-none;
+  }
+  
+  .premium-card:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Button Styles */
+  .btn-primary {
+    @apply px-6 py-3 bg-fc-emerald hover:bg-fc-teal-light text-white font-medium rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(5,150,105,0.3)] hover:shadow-[0_0_20px_rgba(20,184,166,0.5)] transform hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-fc-charcoal-light hover:bg-gray-700 text-fc-warm-white font-medium rounded-xl transition-all duration-300 border border-gray-600 hover:border-gray-500;
+  }
+
+  .btn-outline {
+    @apply px-6 py-3 border border-fc-teal text-fc-teal hover:bg-fc-teal/10 font-medium rounded-xl transition-all duration-300;
+  }
+
+  /* Input Styles */
+  .input-premium {
+    @apply w-full bg-fc-charcoal-dark border border-fc-charcoal-light rounded-xl px-4 py-3 text-fc-warm-white focus:outline-none focus:ring-2 focus:ring-fc-emerald/50 focus:border-fc-emerald transition-all duration-300;
+  }
+}
+
+/* Subtle scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-fc-charcoal-dark;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-fc-charcoal-light rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-600;
+}
