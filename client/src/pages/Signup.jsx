@@ -128,7 +128,7 @@ function Signup() {
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-2">10% of your subscription will be automatically donated here.</p>
+              <p className="text-xs text-gray-500 mt-2">A minimum of 10% of your subscription will be automatically donated here.</p>
             </div>
 
             <button type="submit" disabled={loading} className="w-full btn-primary mt-4 flex items-center justify-center gap-2">

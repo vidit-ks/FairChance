@@ -297,10 +297,14 @@ function Admin() {
           {activeTab === 'overview' && (
             <motion.div key="overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               <h1 className="text-2xl font-bold text-white mb-6">Platform Overview</h1>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                 <div className="premium-card p-6 border-l-4 border-l-fc-emerald">
                   <h3 className="text-gray-400 text-sm mb-1">Total Users</h3>
                   <p className="text-3xl font-bold text-white">{stats.users}</p>
+                </div>
+                <div className="premium-card p-6 border-l-4 border-l-yellow-500">
+                  <h3 className="text-gray-400 text-sm mb-1">Pending Requests</h3>
+                  <p className="text-3xl font-bold text-white">{stats.pendingApprovals}</p>
                 </div>
                 <div className="premium-card p-6 border-l-4 border-l-fc-teal">
                   <h3 className="text-gray-400 text-sm mb-1">Active Subs</h3>
@@ -314,7 +318,7 @@ function Admin() {
                   <h3 className="text-gray-400 text-sm mb-1">Pending Checks</h3>
                   <p className="text-3xl font-bold text-white">{stats.pendingVerifications}</p>
                 </div>
-                <div className="premium-card p-6 border-l-4 border-l-fc-charcoal-light col-span-1 md:col-span-2 lg:col-span-4 flex items-center justify-between">
+                <div className="premium-card p-6 border-l-4 border-l-fc-charcoal-light col-span-1 md:col-span-2 lg:col-span-5 flex items-center justify-between">
                   <div>
                     <h3 className="text-gray-400 text-sm mb-1">Total Charity Capital Raised (Estimated)</h3>
                     <p className="text-4xl font-bold text-fc-gold">${(stats.activeSubs * 1).toLocaleString()}</p>
