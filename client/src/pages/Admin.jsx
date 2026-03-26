@@ -339,7 +339,7 @@ function Admin() {
                             <p className="text-xs text-gray-400">{sub.users?.email}</p>
                           </div>
                           <span className="text-xs font-bold px-2 py-1 bg-fc-charcoal rounded border border-gray-600 uppercase tracking-wider text-gray-300">
-                            {sub.plan_id}
+                            {sub.plan_type}
                           </span>
                         </div>
                         <div className="bg-black/30 p-3 rounded text-sm text-gray-300 italic mb-4 border-l-2 border-yellow-500/50">

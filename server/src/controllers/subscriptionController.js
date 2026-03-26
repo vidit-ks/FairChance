@@ -30,6 +30,7 @@ const createSubscription = async (req, res) => {
       .insert([{
         user_id: userId,
         status: "active",
+        plan_type: plan_id,
         renewal_date: renewalDate,
       }])
       .select()
@@ -192,7 +193,7 @@ const requestOfflineSubscription = async (req, res) => {
       .insert([{
         user_id: userId,
         status: "pending_approval",
-        plan_id: plan_id,
+        plan_type: plan_id,
         notes: note,
         renewal_date: new Date().toISOString()
       }])
@@ -221,7 +222,7 @@ const decideOfflineSubscription = async (req, res) => {
 
     let updates = {};
     if (decision === 'approve') {
-      const isYearly = sub.plan_id === 'yearly';
+      const isYearly = sub.plan_type === 'yearly';
       const renewalDate = new Date();
       if (isYearly) renewalDate.setFullYear(renewalDate.getFullYear() + 1);
       else renewalDate.setMonth(renewalDate.getMonth() + 1);
