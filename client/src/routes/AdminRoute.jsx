@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { getNormalizedRole } from "../utils/getRole";
 
 function AdminRoute({ children }) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("fairchance_token");
   const role = getNormalizedRole();
 
   if (!token) {
