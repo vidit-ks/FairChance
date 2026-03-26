@@ -58,18 +58,17 @@ const verifyProof = async (req, res) => {
     const { id } = req.params;
     const { status, rejection_reason } = req.body;
 
-    if (!["approved", "rejected"].includes(status)) {
-      return res.status(400).json({ message: "Status must be 'approved' or 'rejected'" });
+    if (!["approved", "rejected", "paid"].includes(status)) {
+      return res.status(400).json({ message: "Status must be 'approved', 'rejected', or 'paid'" });
     }
 
-    let updateData = { verification_status: status };
-    
-    if (status === "approved") {
-      updateData.paid_at = new Date().toISOString();
-      updateData.rejection_reason = null; // Clear if previously rejected
+    let updateData = {};
+    if (status === "paid") {
+      updateData = { verification_status: "approved", paid_at: new Date().toISOString(), rejection_reason: null };
+    } else if (status === "approved") {
+      updateData = { verification_status: "approved", paid_at: null, rejection_reason: null };
     } else if (status === "rejected") {
-      updateData.rejection_reason = rejection_reason || "Verification failed";
-      updateData.paid_at = null;
+      updateData = { verification_status: "rejected", rejection_reason: rejection_reason || "Verification failed", paid_at: null };
     }
 
     const { data: updatedRecord, error: updateError } = await supabase
@@ -105,8 +104,41 @@ const getAllProofs = async (req, res) => {
   }
 };
 
+const getMyProofs = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { data, error } = await supabase
+      .from("winners")
+      .select(`
+        *,
+        draw_results(*, draws(*))
+      `)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    
+    // Calculate total won
+    let totalWon = 0;
+    data.forEach(proof => {
+      if (proof.verification_status === 'approved' && proof.paid_at) {
+        // Mocking individual payout logic: 40% for 5-match, 35% for 4-match, etc.
+        // Needs proper algorithm in large scope, but we approximate to base jackpot here.
+        if (proof.draw_results?.draws?.jackpot_pool) {
+            totalWon += Number(proof.draw_results.draws.jackpot_pool) * (proof.draw_results.matched_count === 5 ? 0.40 : 0.10);
+        }
+      }
+    });
+
+    res.status(200).json({ proofs: data, total_won: totalWon });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch proofs", error: error.message });
+  }
+};
+
 module.exports = {
   uploadProof,
   verifyProof,
-  getAllProofs
+  getAllProofs,
+  getMyProofs
 };

@@ -9,14 +9,46 @@ const generateUniqueNumbers = () => {
   return Array.from(numbers).sort((a, b) => a - b);
 };
 
+const generateAlgorithmicNumbers = async () => {
+  // Fetch all recent user scores to weigh frequency
+  const { data: allScores } = await supabase.from("scores").select("score");
+  
+  if (!allScores || allScores.length === 0) {
+    return generateUniqueNumbers(); // Fallback if no data
+  }
+
+  const frequency = {};
+  for (let i = 1; i <= 45; i++) frequency[i] = 0;
+  
+  allScores.forEach(s => {
+    if (frequency[s.score] !== undefined) frequency[s.score]++;
+  });
+
+  const sortedNumbers = Object.keys(frequency).sort((a, b) => frequency[b] - frequency[a]);
+  
+  // Pick 3 most frequent, 2 least frequent (with at least 0 frequency if unplayed)
+  const mostFrequent = sortedNumbers.slice(0, 3).map(Number);
+  
+  // For least frequent, we want to look at the bottom of the list, 
+  // ensuring we don't pick overlap with mostFrequent
+  const remaining = sortedNumbers.map(Number).filter(n => !mostFrequent.includes(n));
+  const leastFrequent = remaining.slice(-2);
+
+  const finalNumbers = [...mostFrequent, ...leastFrequent];
+  return finalNumbers.sort((a, b) => a - b);
+};
+
 // STEP A: CREATE DRAW
 const createDraw = async (req, res) => {
   try {
-    const { mode } = req.body; // 'random', 'algorithm', 'simulation'
+    const { mode } = req.body; 
     
-    // In actual implementation, 'algorithm' and 'simulation' would behave differently.
-    // We'll just generate the numbers first here.
-    const drawNumbers = generateUniqueNumbers();
+    let drawNumbers = [];
+    if (mode === 'algorithm') {
+      drawNumbers = await generateAlgorithmicNumbers();
+    } else {
+      drawNumbers = generateUniqueNumbers();
+    }
 
     // Fetch the previous draw to carry over the jackpot pool / rollover
     const { data: previousDraw } = await supabase
@@ -145,6 +177,49 @@ const publishDraw = async (req, res) => {
   }
 };
 
+const simulateDraw = async (req, res) => {
+  try {
+    const { mode = 'random' } = req.body;
+    let drawNumbers = [];
+
+    if (mode === 'algorithm') {
+      drawNumbers = await generateAlgorithmicNumbers();
+    } else {
+      drawNumbers = generateUniqueNumbers();
+    }
+
+    const { data: activeSubs } = await supabase.from("subscriptions").select("user_id").eq("status", "active");
+    const activeUserIds = activeSubs ? activeSubs.map(sub => sub.user_id) : [];
+
+    let matchStats = { 5: 0, 4: 0, 3: 0 };
+    let totalWinners = 0;
+
+    for (const userId of activeUserIds) {
+      const { data: scores } = await supabase.from("scores").select("score").eq("user_id", userId).order("created_at", { ascending: false }).limit(5);
+      if (!scores) continue;
+      
+      const userScores = scores.map((s) => s.score);
+      const matchedNumbers = userScores.filter((num) => drawNumbers.includes(num));
+      
+      if (matchedNumbers.length >= 3) {
+        matchStats[matchedNumbers.length]++;
+        totalWinners++;
+      }
+    }
+
+    res.status(200).json({
+      predicted_numbers: drawNumbers,
+      mode_used: mode,
+      total_winners: totalWinners,
+      match_distribution: matchStats,
+      jackpot_hit: matchStats[5] > 0
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Simulation failed", error: error.message });
+  }
+};
+
 const getLatestDraw = async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -195,4 +270,39 @@ const getLatestResults = async (req, res) => {
   }
 };
 
-module.exports = { createDraw, publishDraw, getLatestDraw, getLatestResults };
+const getParticipationSummary = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // 1. Get total past draws where user had an entry
+    const { data: results, error: resError } = await supabase
+      .from("draw_results")
+      .select("id")
+      .eq("user_id", userId);
+      
+    // 2. Next upcoming draw logic: if user is active, it's roughly 1 month from last draw
+    const { data: latestDraw } = await supabase
+      .from("draws")
+      .select("created_at")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let upcoming = "Pending active subscription";
+    const { data: sub } = await supabase.from("subscriptions").select("status").eq("user_id", userId).eq("status", "active").maybeSingle();
+    
+    if (sub && sub.status === 'active' && latestDraw) {
+      const nextDate = new Date(latestDraw.created_at);
+      nextDate.setMonth(nextDate.getMonth() + 1);
+      upcoming = nextDate.toLocaleDateString();
+    }
+
+    res.json({
+      entered: results?.length || 0,
+      upcoming: upcoming
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to get participation", error: error.message });
+  }
+};
+
+module.exports = { createDraw, publishDraw, getLatestDraw, getLatestResults, simulateDraw, getParticipationSummary };

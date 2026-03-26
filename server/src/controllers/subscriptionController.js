@@ -157,10 +157,88 @@ const getAllSubscriptions = async (req, res) => {
   }
 };
 
+const requestOfflineSubscription = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { note, plan_id = 'monthly' } = req.body;
+
+    if (!note) {
+      return res.status(400).json({ message: "A note detailing offline payment context is technically required." });
+    }
+
+    const { data: existing, error: checkError } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", userId)
+      .in("status", ["active", "pending_approval", "pending_payment"])
+      .maybeSingle();
+
+    if (existing) {
+      return res.status(400).json({ message: "You already have a subscription or pending request." });
+    }
+
+    const { data: sub, error } = await supabase
+      .from("subscriptions")
+      .insert([{
+        user_id: userId,
+        status: "pending_approval",
+        plan_id: plan_id,
+        notes: note
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json({ message: "Offline access request sent successfully.", subscription: sub });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to request offline subscription", error: error.message });
+  }
+};
+
+const decideOfflineSubscription = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { decision } = req.body; // 'approve' or 'deny'
+
+    const { data: sub } = await supabase.from("subscriptions").select("*").eq("id", id).single();
+    if (!sub || sub.status !== 'pending_approval') {
+      return res.status(400).json({ message: "Valid pending subscription not found" });
+    }
+
+    let updates = {};
+    if (decision === 'approve') {
+      const isYearly = sub.plan_id === 'yearly';
+      const renewalDate = new Date();
+      if (isYearly) renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+      else renewalDate.setMonth(renewalDate.getMonth() + 1);
+
+      updates = { status: 'active', renewal_date: renewalDate, started_at: new Date() };
+    } else if (decision === 'deny') {
+      updates = { status: 'denied' };
+    } else {
+      return res.status(400).json({ message: "Invalid admin decision state." });
+    }
+
+    const { data: updatedSub, error } = await supabase
+      .from("subscriptions")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(200).json({ message: `Subscription request ${decision}d.`, subscription: updatedSub });
+  } catch (error) {
+    res.status(500).json({ message: "Decision engine failure", error: error.message });
+  }
+};
+
 module.exports = {
   createSubscription,
   getUserSubscription,
   cancelSubscription,
   modifySubscription,
   getAllSubscriptions,
+  requestOfflineSubscription,
+  decideOfflineSubscription
 };

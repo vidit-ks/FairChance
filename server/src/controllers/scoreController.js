@@ -3,7 +3,7 @@ const supabase = require("../config/supabaseClient");
 const addScore = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { score } = req.body;
+    const { score, played_at } = req.body;
 
     if (score === undefined || score === null) {
       return res.status(400).json({ message: "Score is required" });
@@ -14,7 +14,12 @@ const addScore = async (req, res) => {
       return res.status(400).json({ message: "Score must be between 1 and 45" });
     }
 
-    const playedAt = new Date().toISOString();
+    let playedAt;
+    try {
+      playedAt = played_at ? new Date(played_at).toISOString() : new Date().toISOString();
+    } catch (e) {
+      playedAt = new Date().toISOString();
+    }
 
     const { error: insertError } = await supabase.from("scores").insert([
       {

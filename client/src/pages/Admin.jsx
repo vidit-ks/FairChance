@@ -19,12 +19,16 @@ function Admin() {
   const [allScores, setAllScores] = useState([]);
   const [allCharities, setAllCharities] = useState([]);
   
-  const [stats, setStats] = useState({ users: 0, activeSubs: 0, pool: 0, pendingVerifications: 0 });
+  const [stats, setStats] = useState({ users: 0, activeSubs: 0, pool: 0, pendingVerifications: 0, pendingApprovals: 0 });
   const [loading, setLoading] = useState(true);
 
   // Charity Form State
   const [charityForm, setCharityForm] = useState({ id: null, name: "", description: "", is_featured: false, min_percentage: 10 });
   const [isEditingCharity, setIsEditingCharity] = useState(false);
+  
+  // Draw Engine State
+  const [drawMode, setDrawMode] = useState("random");
+  const [simulationResult, setSimulationResult] = useState(null);
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("fairchance_user"));
@@ -64,11 +68,14 @@ function Admin() {
       setAllCharities(Array.isArray(charData) ? charData : []);
       
       const activeSubs = subs.filter(s => s.status === 'active').length;
+      const pendingApprovalCount = subs.filter(s => s.status === 'pending_approval').length;
+      
       setStats({
         users: usersData?.users?.length || 0,
         activeSubs: activeSubs,
         pool: drawData?.jackpot_pool || 0,
-        pendingVerifications: verifs.filter(v => v.verification_status === 'pending').length
+        pendingVerifications: verifs.filter(v => v.verification_status === 'pending').length,
+        pendingApprovals: pendingApprovalCount
       });
     } catch (error) {
       console.error("Admin fetch error:", error);
@@ -81,9 +88,10 @@ function Admin() {
   // --- DRAW ENGINE ---
   const handleCreateDraw = async () => {
     try {
-      const { draw } = await api.post("/draws/create", { mode: 'random' });
+      const { draw } = await api.post("/draws/create", { mode: drawMode });
       setLatestDraw(draw);
-      toast.success("Draw created successfully. Ready to publish.");
+      setSimulationResult(null);
+      toast.success(`Draw created successfully in ${drawMode} mode. Ready to publish.`);
     } catch (error) {
       toast.error(error.message || "Failed to create draw");
     }
@@ -101,6 +109,19 @@ function Admin() {
       } else {
         toast.error(error.message || "Failed to publish draw");
       }
+    }
+  };
+
+  const handleSimulateDraw = async () => {
+    try {
+      setLoading(true);
+      const data = await api.post("/draws/simulate", { mode: drawMode });
+      setSimulationResult(data);
+      toast.success("Simulation Complete!");
+    } catch (error) {
+      toast.error(error.message || "Simulation failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -157,6 +178,16 @@ function Admin() {
     }
   };
 
+  const handleAdminDecideSubscription = async (subId, decision) => {
+    try {
+      await api.patch(`/subscriptions/${subId}/decide`, { decision });
+      toast.success(`Request successfully ${decision}d.`);
+      fetchData();
+    } catch (error) {
+      toast.error(error.message || `Failed to ${decision} request.`);
+    }
+  };
+  
   const handleAdminCancelUser = async (subId) => {
     if (!window.confirm("Cancel this user's subscription?")) return;
     try {
@@ -179,6 +210,30 @@ function Admin() {
     }
   };
 
+  const handleAdminEditUser = async (user) => {
+    const newName = window.prompt("Enter new name for user:", user.name);
+    if (!newName) return;
+    try {
+      await api.put(`/auth/users/${user.id}`, { name: newName });
+      toast.success("User profile updated");
+      fetchData();
+    } catch (error) {
+      toast.error(error.message || "Failed to edit user");
+    }
+  };
+
+  const handleAdminEditScore = async (scoreObj) => {
+    const newVal = window.prompt("Enter new stableford score (1-45):", scoreObj.score);
+    if (!newVal || isNaN(newVal) || newVal < 1 || newVal > 45) return toast.error("Invalid range.");
+    try {
+      await api.put(`/scores/${scoreObj.id}`, { score: Number(newVal), played_at: scoreObj.played_at });
+      toast.success("Score overridden");
+      fetchData();
+    } catch (error) {
+      toast.error("Failed to edit score");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-fc-charcoal-dark">
@@ -192,7 +247,7 @@ function Admin() {
     { id: 'draws', label: 'Draw Engine', icon: Ticket },
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'charities', label: 'Charities', icon: Heart },
-    { id: 'verification', label: 'Queue', icon: CheckCircle },
+    { id: 'verification', label: 'Winners Registry', icon: Trophy },
   ];
 
   return (
@@ -216,6 +271,9 @@ function Admin() {
             >
               <item.icon className="w-4 h-4" />
               {item.label}
+              {item.id === 'overview' && stats.pendingApprovals > 0 && (
+                <span className="ml-auto bg-yellow-500 text-black text-[10px] px-2 py-0.5 rounded-full font-bold">{stats.pendingApprovals}</span>
+              )}
               {item.id === 'verification' && stats.pendingVerifications > 0 && (
                 <span className="ml-auto bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full">{stats.pendingVerifications}</span>
               )}
@@ -256,7 +314,51 @@ function Admin() {
                   <h3 className="text-gray-400 text-sm mb-1">Pending Checks</h3>
                   <p className="text-3xl font-bold text-white">{stats.pendingVerifications}</p>
                 </div>
+                <div className="premium-card p-6 border-l-4 border-l-fc-charcoal-light col-span-1 md:col-span-2 lg:col-span-4 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-gray-400 text-sm mb-1">Total Charity Capital Raised (Estimated)</h3>
+                    <p className="text-4xl font-bold text-fc-gold">${(stats.activeSubs * 1).toLocaleString()}</p>
+                  </div>
+                  <Heart className="w-12 h-12 text-fc-gold opacity-50"/>
+                </div>
               </div>
+
+              {/* Pending Approvals Inbox */}
+              {stats.pendingApprovals > 0 && (
+                <div className="mb-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
+                    <h2 className="text-xl font-bold text-white">Action Required: Pending Approvals</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {allSubscriptions.filter(s => s.status === 'pending_approval').map(sub => (
+                      <div key={sub.id} className="premium-card p-5 border border-yellow-500/30 bg-fc-charcoal-dark/50">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <p className="font-bold text-white text-lg">{sub.users?.name || "Unknown User"}</p>
+                            <p className="text-xs text-gray-400">{sub.users?.email}</p>
+                          </div>
+                          <span className="text-xs font-bold px-2 py-1 bg-fc-charcoal rounded border border-gray-600 uppercase tracking-wider text-gray-300">
+                            {sub.plan_id}
+                          </span>
+                        </div>
+                        <div className="bg-black/30 p-3 rounded text-sm text-gray-300 italic mb-4 border-l-2 border-yellow-500/50">
+                          "{sub.notes || "No context provided."}"
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => handleAdminDecideSubscription(sub.id, 'approve')} className="flex-1 bg-fc-emerald/10 text-fc-emerald hover:bg-fc-emerald hover:text-fc-charcoal border border-fc-emerald/30 py-2 rounded font-bold transition-all shadow-sm">
+                            Approve Access
+                          </button>
+                          <button onClick={() => handleAdminDecideSubscription(sub.id, 'deny')} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/30 py-2 rounded font-bold transition-all shadow-sm">
+                            Deny
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
             </motion.div>
           )}
 
@@ -312,7 +414,42 @@ function Admin() {
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-gray-400 mb-6 text-lg">No active draw in the system. Ready to begin cycle.</p>
-                    <button onClick={handleCreateDraw} className="btn-primary py-3 px-8 text-lg font-medium">Initialize New Monthly Draw</button>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+                      <select className="input-premium sm:w-48 text-center" value={drawMode} onChange={e => setDrawMode(e.target.value)}>
+                        <option value="random">Random Generation</option>
+                        <option value="algorithm">Algorithmic Weighted</option>
+                      </select>
+                      <button onClick={handleCreateDraw} className="btn-primary py-3 px-8 text-lg font-medium">Initialize New Monthly Draw</button>
+                    </div>
+                    
+                    <button onClick={handleSimulateDraw} className="text-fc-teal hover:underline text-sm font-medium border border-fc-teal/30 px-4 py-2 rounded-lg bg-fc-teal/10 hover:bg-fc-teal/20 transition-all">
+                      Run Dry Simulation First
+                    </button>
+
+                    {simulationResult && (
+                      <div className="mt-8 text-left bg-fc-charcoal rounded-xl p-6 border-2 border-dashed border-fc-charcoal-light">
+                        <h4 className="text-white font-bold mb-4 flex items-center gap-2">Simulation Output <span className="text-xs bg-gray-700 px-2 rounded">{simulationResult.mode_used}</span></h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                          <div className="bg-fc-charcoal-dark p-3 rounded text-center border border-fc-charcoal-light">
+                            <span className="block text-xs text-gray-400">Total Winners</span>
+                            <span className="block text-xl font-bold text-white">{simulationResult.total_winners}</span>
+                          </div>
+                          <div className="bg-fc-charcoal-dark p-3 rounded text-center border border-fc-emerald/30">
+                            <span className="block text-xs text-fc-emerald">5 Match</span>
+                            <span className="block text-xl font-bold text-white">{simulationResult.match_distribution["5"]}</span>
+                          </div>
+                          <div className="bg-fc-charcoal-dark p-3 rounded text-center border border-fc-charcoal-light">
+                            <span className="block text-xs text-gray-400">4 Match</span>
+                            <span className="block text-xl font-bold text-white">{simulationResult.match_distribution["4"]}</span>
+                          </div>
+                          <div className="bg-fc-charcoal-dark p-3 rounded text-center border border-fc-charcoal-light">
+                            <span className="block text-xs text-gray-400">3 Match</span>
+                            <span className="block text-xl font-bold text-white">{simulationResult.match_distribution["3"]}</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-400">Numbers generated: {simulationResult.predicted_numbers.join(", ")}</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -334,7 +471,10 @@ function Admin() {
                      <div key={u.id} className="premium-card p-6 flex flex-col xl:flex-row gap-6">
                        
                        <div className="xl:w-1/3">
-                         <h3 className="text-lg font-bold text-white">{u.name} <span className="text-xs font-normal text-gray-500 ml-2 uppercase border border-gray-600 px-2 rounded">{u.role}</span></h3>
+                         <div className="flex justify-between items-start mb-1">
+                           <h3 className="text-lg font-bold text-white">{u.name} <span className="text-xs font-normal text-gray-500 ml-2 uppercase border border-gray-600 px-2 rounded">{u.role}</span></h3>
+                           <button onClick={() => handleAdminEditUser(u)} className="text-gray-400 hover:text-white"><Edit2 className="w-4 h-4"/></button>
+                         </div>
                          <p className="text-sm text-gray-400 mb-4">{u.email}</p>
                          
                          <div className="bg-fc-charcoal-dark rounded-lg p-4 border border-fc-charcoal-light">
@@ -360,9 +500,12 @@ function Admin() {
                          {uScores.length > 0 ? (
                            <div className="flex flex-wrap gap-2">
                              {uScores.map(score => (
-                               <div key={score.id} className="group relative w-12 h-12 rounded flex items-center justify-center bg-fc-charcoal border border-fc-charcoal-light hover:border-red-500 transition-colors cursor-pointer" onClick={() => handleAdminDeleteScore(score.id)} title="Click to delete score">
+                               <div key={score.id} className="group relative w-12 h-12 rounded flex items-center justify-center bg-fc-charcoal border border-fc-charcoal-light hover:border-fc-emerald transition-colors" title="Edit or Delete">
                                  <span className="font-bold text-white group-hover:hidden">{score.score}</span>
-                                 <Trash2 className="w-4 h-4 text-red-500 hidden group-hover:block" />
+                                 <div className="hidden group-hover:flex items-center gap-1">
+                                   <button onClick={() => handleAdminEditScore(score)} className="p-1 hover:text-fc-emerald"><Edit2 className="w-3 h-3 text-gray-300" /></button>
+                                   <button onClick={() => handleAdminDeleteScore(score.id)} className="p-1 hover:text-red-500"><Trash2 className="w-3 h-3 text-red-400" /></button>
+                                 </div>
                                </div>
                              ))}
                            </div>
@@ -475,6 +618,20 @@ function Admin() {
                             <button onClick={() => handleVerify(item.id, 'rejected')} className="text-xs font-bold uppercase tracking-wider py-2 px-4 bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white rounded transition-colors border border-transparent">
                               Reject Fraud
                             </button>
+                          </div>
+                        )}
+
+                        {item.verification_status === 'approved' && !item.paid_at && (
+                          <div className="flex sm:flex-col gap-2 shrink-0 self-start sm:self-center">
+                            <button onClick={() => handleVerify(item.id, 'paid')} className="text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 py-2 px-4 bg-blue-500 text-fc-charcoal-dark hover:bg-blue-400 rounded transition-all shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                              Mark Payout Processed
+                            </button>
+                          </div>
+                        )}
+                        
+                        {item.paid_at && (
+                          <div className="flex sm:flex-col gap-2 shrink-0 self-start sm:self-center items-center justify-center text-gray-500 font-bold text-xs uppercase opacity-70">
+                            Closed
                           </div>
                         )}
                       </div>
