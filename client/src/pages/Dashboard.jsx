@@ -95,6 +95,17 @@ function Dashboard() {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    if (!subscription || !subscription.id) return;
+    try {
+      await api.patch(`/subscriptions/${subscription.id}/cancel`);
+      setSubscription({ ...subscription, status: 'cancelled' });
+      toast.success("Subscription cancelled successfully.");
+    } catch (error) {
+      toast.error(error.message || "Failed to cancel subscription");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-fc-charcoal-dark">
@@ -114,8 +125,14 @@ function Dashboard() {
           <span className="font-semibold text-fc-warm-white">Dashboard</span>
         </div>
         <div className="flex items-center gap-4 text-sm">
-          <span className="text-gray-400">Welcome back, <span className="text-white font-medium">{user?.name}</span></span>
-          <button onClick={() => { localStorage.clear(); navigate("/"); }} className="text-gray-500 hover:text-white transition-colors">Sign out</button>
+          <div className="hidden sm:block text-right">
+            <div className="text-sm font-bold text-white">{user?.name}</div>
+            <div className="text-xs text-fc-emerald">Premium Member</div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-fc-emerald/20 border border-fc-emerald flex items-center justify-center text-fc-emerald font-bold">
+            {user?.name?.charAt(0) || 'U'}
+          </div>
+          <button onClick={() => { localStorage.clear(); navigate("/"); }} className="ml-2 text-sm text-gray-400 hover:text-red-400 transition-colors">Sign out</button>
         </div>
       </header>
 
@@ -151,7 +168,24 @@ function Dashboard() {
                 </div>
               )}
             </div>
-            {isActive && <button className="text-sm text-gray-500 hover:text-white">Cancel subscription</button>}
+            
+            {isActive && (
+              <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 pt-4 border-t border-fc-charcoal-light">
+                <button 
+                  onClick={() => toast("Plan changes are handled via support in the beta.", { icon: "ℹ️" })} 
+                  className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                >
+                  Change plan
+                </button>
+                <div className="hidden sm:block w-px h-4 bg-fc-charcoal-light"></div>
+                <button 
+                  onClick={handleCancelSubscription} 
+                  className="text-sm font-medium text-red-500 hover:text-red-400 transition-colors"
+                >
+                  Cancel subscription
+                </button>
+              </div>
+            )}
           </motion.div>
 
           {/* Charity Impact Card */}

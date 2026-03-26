@@ -80,7 +80,7 @@ function Home() {
             <button onClick={handleGetStarted} className="btn-primary flex items-center justify-center gap-2 text-lg">
               Start Playing Now <ArrowRight className="w-5 h-5" />
             </button>
-            <button className="btn-secondary text-lg flex items-center justify-center">
+            <button onClick={() => document.getElementById("how-it-works").scrollIntoView({ behavior: 'smooth' })} className="btn-secondary text-lg flex items-center justify-center">
               How it works
             </button>
           </motion.div>
@@ -104,7 +104,7 @@ function Home() {
       </section>
 
       {/* How it Works Section */}
-      <section className="py-24 px-6 md:px-12 bg-fc-charcoal relative">
+      <section id="how-it-works" className="py-24 px-6 md:px-12 bg-fc-charcoal relative">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">A transparent path to winning</h2>

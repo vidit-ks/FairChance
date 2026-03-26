@@ -18,8 +18,13 @@ function Admin() {
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("fairchance_user"));
-    if (!userData || userData.role !== 'admin') {
-      navigate("/");
+    if (!userData) {
+      navigate("/login");
+      return;
+    }
+    const role = String(userData.role || "").trim().toLowerCase();
+    if (role !== 'admin') {
+      navigate("/dashboard");
       return;
     }
     setUser(userData);
