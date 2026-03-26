@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, Users, CreditCard, Gift, Settings, Ticket, CheckCircle, XCircle, Heart, Trash2, Edit2, Plus, ArrowUpRight } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, Gift, Settings, Ticket, CheckCircle, XCircle, Heart, Trash2, Edit2, Plus, ArrowUpRight, Trophy } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../api";
 
