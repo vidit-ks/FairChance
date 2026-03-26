@@ -31,9 +31,9 @@ function Dashboard() {
     try {
       setLoading(true);
       const [scoresRes, subRes, charRes, allCharRes] = await Promise.all([
-        api.get(`/scores/${userId}`),
+        api.get("/scores"),
         api.get(`/subscriptions/${userId}`),
-        api.get(`/charities/selected`),
+        api.get("/charities/selected"),
         api.get("/charities"),
       ]);
 

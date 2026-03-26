@@ -23,7 +23,12 @@ function Home() {
 
   const handleGetStarted = () => {
     if (user) {
-      navigate("/dashboard");
+      const role = String(user.role || "").trim().toLowerCase();
+      if (role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } else {
       navigate("/signup");
     }
