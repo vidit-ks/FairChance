@@ -1,5 +1,26 @@
 const supabase = require("../config/supabaseClient");
 
+const incrementActiveDrawPool = async (amount) => {
+  try {
+    const { data: latestDraw } = await supabase
+      .from("draws")
+      .select("id, jackpot_pool")
+      .is("published_at", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (latestDraw) {
+      await supabase
+        .from("draws")
+        .update({ jackpot_pool: Number(latestDraw.jackpot_pool) + amount })
+        .eq("id", latestDraw.id);
+    }
+  } catch (err) {
+    console.error("Pool increment error", err);
+  }
+};
+
 const createSubscription = async (req, res) => {
   try {
     const userId = req.body.user_id && req.user.role === 'admin' ? req.body.user_id : req.user.id;
@@ -21,8 +42,10 @@ const createSubscription = async (req, res) => {
     const renewalDate = new Date();
     if (plan_id === "yearly") {
       renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+      await incrementActiveDrawPool(100);
     } else {
       renewalDate.setMonth(renewalDate.getMonth() + 1);
+      await incrementActiveDrawPool(10);
     }
 
     const { data: sub, error: insertError } = await supabase
@@ -224,8 +247,13 @@ const decideOfflineSubscription = async (req, res) => {
     if (decision === 'approve') {
       const isYearly = sub.plan_type === 'yearly';
       const renewalDate = new Date();
-      if (isYearly) renewalDate.setFullYear(renewalDate.getFullYear() + 1);
-      else renewalDate.setMonth(renewalDate.getMonth() + 1);
+      if (isYearly) {
+         renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+         await incrementActiveDrawPool(100);
+      } else {
+         renewalDate.setMonth(renewalDate.getMonth() + 1);
+         await incrementActiveDrawPool(10);
+      }
 
       updates = { status: 'active', renewal_date: renewalDate, started_at: new Date() };
     } else if (decision === 'deny') {

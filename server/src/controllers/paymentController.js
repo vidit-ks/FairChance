@@ -106,6 +106,15 @@ const handleWebhook = async (req, res) => {
           updated_at: new Date().toISOString()
         })
         .eq("user_id", userId);
+        
+      // Auto-increment jackpot pool if active draw exists
+      const { data: subInfo } = await supabase.from("subscriptions").select("plan_type").eq("user_id", userId).single();
+      const amount = subInfo?.plan_type === 'yearly' ? 100 : 10;
+      const { data: latestDraw } = await supabase.from("draws").select("id, jackpot_pool").is("published_at", null).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      
+      if (latestDraw) {
+        await supabase.from("draws").update({ jackpot_pool: Number(latestDraw.jackpot_pool) + amount }).eq("id", latestDraw.id);
+      }
 
     } else if (event.event === "subscription.cancelled" || event.event === "subscription.halted") {
       await supabase

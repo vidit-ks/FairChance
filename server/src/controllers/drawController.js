@@ -237,6 +237,29 @@ const getLatestDraw = async (req, res) => {
   }
 };
 
+const editDrawPool = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { new_pool } = req.body;
+    
+    if (isNaN(new_pool) || new_pool < 0) {
+      return res.status(400).json({ message: "Invalid pool amount" });
+    }
+
+    const { data: draw, error } = await supabase
+      .from("draws")
+      .update({ jackpot_pool: Number(new_pool) })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(200).json({ message: "Pool updated successfully", draw });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update pool", error: error.message });
+  }
+};
+
 const getLatestResults = async (req, res) => {
   try {
     const { data: latestDraw, error: drawError } = await supabase
@@ -305,4 +328,4 @@ const getParticipationSummary = async (req, res) => {
   }
 };
 
-module.exports = { createDraw, publishDraw, getLatestDraw, getLatestResults, simulateDraw, getParticipationSummary };
+module.exports = { createDraw, publishDraw, getLatestDraw, getLatestResults, simulateDraw, getParticipationSummary, editDrawPool };

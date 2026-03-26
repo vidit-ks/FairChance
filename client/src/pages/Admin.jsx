@@ -234,6 +234,21 @@ function Admin() {
     }
   };
 
+  const handleEditPool = async () => {
+    if (!latestDraw) return toast.error("Internal draw engine must be initialized before you can override the pool.");
+    
+    const newVal = window.prompt("Enter new absolute jackpot pool amount ($):", latestDraw.jackpot_pool);
+    if (newVal === null || isNaN(newVal) || newVal < 0) return toast.error("Valid positive number strictly required");
+
+    try {
+      await api.patch(`/draws/${latestDraw.id}/pool`, { new_pool: Number(newVal) });
+      toast.success("Jackpot pool permanently overridden");
+      fetchData();
+    } catch (error) {
+      toast.error(error.message || "Failed to override pool limit");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-fc-charcoal-dark">
@@ -312,7 +327,10 @@ function Admin() {
                 </div>
                 <div className="premium-card p-6 border-l-4 border-l-fc-gold">
                   <h3 className="text-gray-400 text-sm mb-1">Current Pool</h3>
-                  <p className="text-3xl font-bold text-white">${stats.pool.toLocaleString()}</p>
+                  <div className="flex items-center justify-between">
+                     <p className="text-3xl font-bold text-white">${stats.pool.toLocaleString()}</p>
+                     <button onClick={handleEditPool} className="p-2 text-fc-gold hover:text-white bg-fc-gold/10 hover:bg-yellow-500 rounded transition-colors" title="Edit Pool"><Edit2 className="w-4 h-4"/></button>
+                  </div>
                 </div>
                 <div className="premium-card p-6 border-l-4 border-l-blue-500">
                   <h3 className="text-gray-400 text-sm mb-1">Pending Checks</h3>
