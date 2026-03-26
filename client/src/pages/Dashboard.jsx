@@ -25,6 +25,7 @@ function Dashboard() {
 
   // Offline Payment Request State
   const [showOfflineModal, setShowOfflineModal] = useState(false);
+  const [isRequestingOffline, setIsRequestingOffline] = useState(false);
   const [offlineNote, setOfflineNote] = useState("");
   const [selectedPlan, setSelectedPlan] = useState("monthly");
 
@@ -179,6 +180,7 @@ function Dashboard() {
 
   const handleOfflineRequest = async (e) => {
     e.preventDefault();
+    setIsRequestingOffline(true);
     try {
       await api.post("/subscriptions/request", { plan_id: selectedPlan, note: offlineNote });
       toast.success("Offline request sent to Administration.");
@@ -186,6 +188,8 @@ function Dashboard() {
       fetchDashboardData(user.id);
     } catch (error) {
       toast.error(error.message || "Failed to send request.");
+    } finally {
+      setIsRequestingOffline(false);
     }
   };
 
@@ -468,8 +472,10 @@ function Dashboard() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setShowOfflineModal(false)} className="flex-1 py-2 rounded font-medium text-gray-400 hover:text-white border border-gray-600 hover:bg-gray-800 transition-colors">Cancel</button>
-                <button type="submit" className="flex-1 btn-primary py-2 shadow-lg">Submit Request</button>
+                <button type="button" onClick={() => setShowOfflineModal(false)} className="flex-1 py-2 rounded font-medium text-gray-400 hover:text-white border border-gray-600 hover:bg-gray-800 transition-colors" disabled={isRequestingOffline}>Cancel</button>
+                <button type="submit" disabled={isRequestingOffline} className="flex-1 btn-primary py-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                  {isRequestingOffline ? "Sending..." : "Submit Request"}
+                </button>
               </div>
             </form>
           </motion.div>
