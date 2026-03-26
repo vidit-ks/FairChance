@@ -84,7 +84,7 @@ function Login() {
                 name="password"
                 type="password"
                 required
-                placeholder="••••••••"
+                placeholder=""
                 className="input-premium"
                 onChange={handleChange}
               />

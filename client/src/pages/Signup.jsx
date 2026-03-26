@@ -62,7 +62,7 @@ function Signup() {
                 name="name"
                 type="text"
                 required
-                placeholder="John Doe"
+                placeholder=""
                 className="input-premium"
                 onChange={handleChange}
               />
@@ -86,7 +86,7 @@ function Signup() {
                 name="password"
                 type="password"
                 required
-                placeholder="••••••••"
+                placeholder=""
                 className="input-premium"
                 onChange={handleChange}
               />

@@ -85,13 +85,24 @@ function Dashboard() {
     }
   };
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (plan_id) => {
     try {
-      const data = await api.post("/subscriptions", { plan_id: "monthly" });
+      const data = await api.post("/subscriptions", { plan_id });
       setSubscription(data.subscription);
-      toast.success("Subscription activated!");
+      toast.success(`Subscription activated (${plan_id})!`);
     } catch (error) {
       toast.error(error.message || "Subscription failed");
+    }
+  };
+
+  const handleChangePlan = async (plan_id) => {
+    if (!subscription || !subscription.id) return;
+    try {
+      const data = await api.patch(`/subscriptions/${subscription.id}/modify`, { plan_id });
+      setSubscription(data.subscription);
+      toast.success(`Plan updated to ${plan_id} successfully.`);
+    } catch (error) {
+      toast.error(error.message || "Failed to modify subscription");
     }
   };
 
@@ -126,8 +137,7 @@ function Dashboard() {
         </div>
         <div className="flex items-center gap-4 text-sm">
           <div className="hidden sm:block text-right">
-            <div className="text-sm font-bold text-white">{user?.name}</div>
-            <div className="text-xs text-fc-emerald">Premium Member</div>
+            <div className="text-sm font-bold text-white mt-1">{user?.name}</div>
           </div>
           <div className="w-10 h-10 rounded-full bg-fc-emerald/20 border border-fc-emerald flex items-center justify-center text-fc-emerald font-bold">
             {user?.name?.charAt(0) || 'U'}
@@ -164,7 +174,10 @@ function Dashboard() {
                     INACTIVE
                   </div>
                   <p className="text-gray-400 text-sm mb-4">You cannot participate in draws without an active subscription.</p>
-                  <button onClick={handleSubscribe} className="btn-primary w-full py-2">Activate Monthly ($10)</button>
+                  <div className="flex flex-col gap-2">
+                    <button onClick={() => handleSubscribe('monthly')} className="btn-primary w-full py-2">Activate Monthly ($10)</button>
+                    <button onClick={() => handleSubscribe('yearly')} className="bg-fc-charcoal-light border border-fc-gold text-fc-gold hover:bg-fc-gold/10 w-full py-2 rounded-lg font-medium transition-colors">Activate Yearly ($100)</button>
+                  </div>
                 </div>
               )}
             </div>
@@ -172,17 +185,23 @@ function Dashboard() {
             {isActive && (
               <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 pt-4 border-t border-fc-charcoal-light">
                 <button 
-                  onClick={() => toast("Plan changes are handled via support in the beta.", { icon: "ℹ️" })} 
-                  className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                  onClick={() => handleChangePlan('monthly')} 
+                  className="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
                 >
-                  Change plan
+                  Switch Monthly
+                </button>
+                <button 
+                  onClick={() => handleChangePlan('yearly')} 
+                  className="text-sm font-medium text-fc-gold hover:text-yellow-400 transition-colors"
+                >
+                  Switch Yearly
                 </button>
                 <div className="hidden sm:block w-px h-4 bg-fc-charcoal-light"></div>
                 <button 
                   onClick={handleCancelSubscription} 
                   className="text-sm font-medium text-red-500 hover:text-red-400 transition-colors"
                 >
-                  Cancel subscription
+                  Cancel
                 </button>
               </div>
             )}

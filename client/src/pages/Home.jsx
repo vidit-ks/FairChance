@@ -44,9 +44,22 @@ function Home() {
           </div>
           <span className="text-xl font-bold tracking-tight">FairChance</span>
         </div>
-        <button onClick={handleGetStarted} className="btn-secondary text-sm px-5 py-2">
-          {user ? "Dashboard" : "Sign In"}
-        </button>
+        <div className="flex gap-4 items-center">
+          {user ? (
+            <button onClick={handleGetStarted} className="btn-secondary text-sm px-5 py-2">
+              Dashboard
+            </button>
+          ) : (
+            <>
+              <button onClick={() => navigate("/login")} className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                Sign In
+              </button>
+              <button onClick={() => navigate("/signup")} className="btn-primary text-sm px-5 py-2">
+                Create Account
+              </button>
+            </>
+          )}
+        </div>
       </nav>
 
       {/* Hero Section */}

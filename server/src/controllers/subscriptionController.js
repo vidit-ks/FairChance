@@ -3,9 +3,8 @@ const supabase = require("../config/supabaseClient");
 const createSubscription = async (req, res) => {
   try {
     const userId = req.user.id;
-    // const { plan_id, payment_method_id } = req.body; // Mocked for now
+    const { plan_id = "monthly" } = req.body; 
 
-    // Check if user already has an active subscription
     const { data: existing, error: checkError } = await supabase
       .from("subscriptions")
       .select("*")
@@ -19,7 +18,11 @@ const createSubscription = async (req, res) => {
     }
 
     const renewalDate = new Date();
-    renewalDate.setMonth(renewalDate.getMonth() + 1);
+    if (plan_id === "yearly") {
+      renewalDate.setFullYear(renewalDate.getFullYear() + 1);
+    } else {
+      renewalDate.setMonth(renewalDate.getMonth() + 1);
+    }
 
     const { data: sub, error: insertError } = await supabase
       .from("subscriptions")
@@ -92,6 +95,39 @@ const cancelSubscription = async (req, res) => {
   }
 };
 
+const modifySubscription = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { plan_id = "monthly" } = req.body;
+
+    const { data: sub } = await supabase.from("subscriptions").select("*").eq("id", id).single();
+    if (!sub) return res.status(404).json({ message: "Subscription not found" });
+    if (req.user.id !== sub.user_id && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const oldDate = new Date(sub.renewal_date);
+    const newDate = new Date();
+    if (plan_id === "yearly") {
+      newDate.setFullYear(newDate.getFullYear() + 1);
+    } else {
+      newDate.setMonth(newDate.getMonth() + 1);
+    }
+
+    const { data: updatedSub, error } = await supabase
+      .from("subscriptions")
+      .update({ renewal_date: newDate })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(200).json({ message: "Subscription modified successfully", subscription: updatedSub });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to modify subscription", error: error.message });
+  }
+};
+
 const getAllSubscriptions = async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -125,5 +161,6 @@ module.exports = {
   createSubscription,
   getUserSubscription,
   cancelSubscription,
+  modifySubscription,
   getAllSubscriptions,
 };
