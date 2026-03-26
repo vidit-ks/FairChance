@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { UserPlus } from "lucide-react";
@@ -14,7 +14,25 @@ function Signup() {
     name: "",
     email: "",
     password: "",
+    charity_id: "",
   });
+  
+  const [charities, setCharities] = useState([]);
+  const [loadingCharities, setLoadingCharities] = useState(true);
+
+  useEffect(() => {
+    const fetchCharities = async () => {
+      try {
+        const data = await api.get("/charities");
+        setCharities(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to load charities", error);
+      } finally {
+        setLoadingCharities(false);
+      }
+    };
+    fetchCharities();
+  }, []);
 
   const handleChange = (e) => {
     setForm({
@@ -90,6 +108,27 @@ function Signup() {
                 className="input-premium"
                 onChange={handleChange}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">Supported Charity <span className="text-fc-emerald">*</span></label>
+              <select
+                name="charity_id"
+                required
+                className="input-premium py-3"
+                onChange={handleChange}
+                value={form.charity_id}
+              >
+                <option value="" disabled>
+                  {loadingCharities ? "Loading charities..." : "Select a charity to support"}
+                </option>
+                {charities.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-2">10% of your subscription will be automatically donated here.</p>
             </div>
 
             <button type="submit" disabled={loading} className="w-full btn-primary mt-4 flex items-center justify-center gap-2">

@@ -90,10 +90,10 @@ const editScore = async (req, res) => {
       return res.status(400).json({ message: "Score must be between 1 and 45" });
     }
 
-    // Verify ownership
+    // Verify ownership or admin
     const { data: existing } = await supabase.from("scores").select("user_id").eq("id", id).single();
     if (!existing) return res.status(404).json({ message: "Score not found" });
-    if (existing.user_id !== userId) return res.status(403).json({ message: "Access denied" });
+    if (existing.user_id !== userId && req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
 
     const { data: updated, error } = await supabase
       .from("scores")
@@ -115,10 +115,10 @@ const deleteScore = async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params;
 
-    // Verify ownership
+    // Verify ownership or admin
     const { data: existing } = await supabase.from("scores").select("user_id").eq("id", id).single();
     if (!existing) return res.status(404).json({ message: "Score not found" });
-    if (existing.user_id !== userId) return res.status(403).json({ message: "Access denied" });
+    if (existing.user_id !== userId && req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
 
     const { error } = await supabase.from("scores").delete().eq("id", id);
     if (error) throw error;
@@ -129,4 +129,18 @@ const deleteScore = async (req, res) => {
   }
 };
 
-module.exports = { addScore, getScores, editScore, deleteScore };
+const getAllScores = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("scores")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch all scores", error: error.message });
+  }
+};
+
+module.exports = { addScore, getScores, editScore, deleteScore, getAllScores };

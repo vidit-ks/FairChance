@@ -4,10 +4,10 @@ const supabase = require("../config/supabaseClient");
 
 const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, charity_id } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!name || !email || !password || !charity_id) {
+      return res.status(400).json({ message: "Name, email, password, and charity are required" });
     }
 
     const { data: existingUser, error: findError } = await supabase
@@ -34,6 +34,7 @@ const signup = async (req, res) => {
           email,
           password: hashedPassword,
           role: "subscriber",
+          charity_id: charity_id,
         },
       ])
       .select()

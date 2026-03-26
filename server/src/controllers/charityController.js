@@ -23,6 +23,27 @@ const getCharities = async (req, res) => {
   }
 };
 
+const createCharity = async (req, res) => {
+  try {
+    const { name, is_featured, min_percentage, description, image_url } = req.body;
+    
+    if (!name) return res.status(400).json({ message: "Charity name is required" });
+
+    const { data, error } = await supabase
+      .from("charities")
+      .insert([
+        { name, is_featured, min_percentage, description, image_url }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json({ message: "Charity created successfully", charity: data });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create charity", error: error.message });
+  }
+};
+
 const updateCharity = async (req, res) => {
   try {
     const { id } = req.params;
@@ -93,4 +114,29 @@ const getSelectedCharity = async (req, res) => {
   }
 };
 
-module.exports = { getCharities, updateCharity, selectCharity, getSelectedCharity };
+const deleteCharity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // First, verify the charity exists
+    const { data: existing, error: findError } = await supabase
+      .from("charities")
+      .select("id")
+      .eq("id", id)
+      .single();
+
+    if (findError) return res.status(404).json({ message: "Charity not found" });
+
+    const { error } = await supabase
+      .from("charities")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    res.status(200).json({ message: "Charity deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete charity", error: error.message });
+  }
+};
+
+module.exports = { getCharities, createCharity, updateCharity, deleteCharity, selectCharity, getSelectedCharity };

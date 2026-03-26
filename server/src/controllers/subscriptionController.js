@@ -2,7 +2,7 @@ const supabase = require("../config/supabaseClient");
 
 const createSubscription = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.body.user_id && req.user.role === 'admin' ? req.body.user_id : req.user.id;
     const { plan_id = "monthly" } = req.body; 
 
     const { data: existing, error: checkError } = await supabase
