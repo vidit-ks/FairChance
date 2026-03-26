@@ -22,7 +22,13 @@ const app = express();
 // but standard express.json() is actually fine for Razorpay signature validation (we will verify JSON.stringify(req.body)).
 app.use(express.json());
 app.use(cors({
-  origin: ["http://localhost:5173", "https://fairchance-frontend.onrender.com"],
+  origin: [
+    "http://localhost:5173", 
+    "http://localhost:5174", 
+    "http://localhost:5175", 
+    "https://fairchance-frontend.onrender.com",
+    process.env.CLIENT_URL || "https://fair-chance-nine.vercel.app"
+  ],
   credentials: true
 }));
 
