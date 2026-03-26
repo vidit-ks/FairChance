@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { getNormalizedRole } from "../utils/getRole";
+import { Heart } from "lucide-react";
 
 function Navbar() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("fairchance_user"));
   const role = getNormalizedRole();
 
   const handleLogout = () => {
@@ -12,18 +13,21 @@ function Navbar() {
   };
 
   return (
-    <nav className="w-full bg-white shadow-md px-6 py-4 flex justify-between items-center">
-      <h1 className="text-xl font-bold text-blue-600">FairChance</h1>
+    <nav className="fixed w-full z-50 top-0 bg-fc-charcoal-dark/80 backdrop-blur-md border-b border-fc-charcoal-light py-4 px-6 md:px-12 flex justify-between items-center">
+      <Link to="/" className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-fc-emerald to-fc-teal flex items-center justify-center">
+          <Heart className="w-4 h-4 text-white fill-current" />
+        </div>
+        <span className="text-xl font-bold tracking-tight text-fc-warm-white hover:text-white transition-colors">FairChance</span>
+      </Link>
 
-      <div className="flex gap-6 items-center">
-        <Link to="/" className="hover:text-blue-600">Home</Link>
-
+      <div className="flex gap-4 md:gap-6 items-center">
         {!user && (
           <>
-            <Link to="/login" className="hover:text-blue-600">Login</Link>
+            <Link to="/login" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Sign In</Link>
             <Link
               to="/signup"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              className="btn-primary text-sm px-5 py-2"
             >
               Get Started
             </Link>
@@ -32,8 +36,8 @@ function Navbar() {
 
         {user && role === "admin" && (
           <>
-            <Link to="/admin" className="hover:text-blue-600">Admin</Link>
-            <button onClick={handleLogout} className="text-red-600 font-medium">
+            <Link to="/admin" className="text-gray-400 hover:text-fc-gold transition-colors text-sm font-medium">Admin Center</Link>
+            <button onClick={handleLogout} className="text-red-400 hover:text-red-300 transition-colors text-sm font-medium">
               Logout
             </button>
           </>
@@ -41,8 +45,8 @@ function Navbar() {
 
         {user && role !== "admin" && (
           <>
-            <Link to="/dashboard" className="hover:text-blue-600">Dashboard</Link>
-            <button onClick={handleLogout} className="text-red-600 font-medium">
+            <Link to="/dashboard" className="text-gray-400 hover:text-fc-emerald transition-colors text-sm font-medium">Dashboard</Link>
+            <button onClick={handleLogout} className="text-red-400 hover:text-red-300 transition-colors text-sm font-medium">
               Logout
             </button>
           </>

@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Heart, LogIn } from "lucide-react";
+import toast from "react-hot-toast";
+import api from "../api";
 import Navbar from "../components/Navbar";
 
 function Login() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     email: "",
@@ -19,27 +24,17 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      const res = await fetch("https://fairchance-backend.onrender.com/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Login failed");
-        return;
-      }
+      const data = await api.post("/auth/login", form);
 
       const role = String(data.user?.role || "").trim().toLowerCase();
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("fairchance_token", data.token);
+      localStorage.setItem("fairchance_user", JSON.stringify(data.user));
+
+      toast.success("Welcome back!");
 
       if (role === "admin") {
         navigate("/admin", { replace: true });
@@ -47,43 +42,67 @@ function Login() {
         navigate("/dashboard", { replace: true });
       }
     } catch (error) {
-      console.log(error);
-      alert("Login failed");
+      toast.error(error.message || "Invalid credentials");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-fc-charcoal-dark text-fc-warm-white selection:bg-fc-emerald selection:text-white flex flex-col">
       <Navbar />
 
-      <div className="flex items-center justify-center py-16 px-4">
-        <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h2>
-          <p className="text-slate-600 mb-6">Login to your FairChance account</p>
+      <main className="flex-1 flex items-center justify-center py-20 px-4 relative overflow-hidden">
+        {/* Decorative background glows */}
+        <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-fc-emerald/10 rounded-full blur-[100px] -z-10 translate-y--1/2" />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              name="email"
-              type="email"
-              placeholder="Enter your email"
-              className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-              onChange={handleChange}
-            />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md premium-card p-8 md:p-10 relative">
+          
+          <div className="w-12 h-12 rounded-xl bg-fc-charcoal-light flex items-center justify-center mb-6">
+            <LogIn className="w-6 h-6 text-fc-emerald" />
+          </div>
 
-            <input
-              name="password"
-              type="password"
-              placeholder="Enter your password"
-              className="w-full border border-slate-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-              onChange={handleChange}
-            />
+          <h2 className="text-3xl font-bold mb-2 tracking-tight">Welcome Back</h2>
+          <p className="text-gray-400 mb-8">Sign in to your FairChance account to manage your numbers and subscriptions.</p>
 
-            <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700">
-              Login
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">Email Address</label>
+              <input
+                name="email"
+                type="email"
+                required
+                placeholder="you@example.com"
+                className="input-premium"
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">Password</label>
+              <input
+                name="password"
+                type="password"
+                required
+                placeholder="••••••••"
+                className="input-premium"
+                onChange={handleChange}
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className="w-full btn-primary mt-4 flex items-center justify-center gap-2">
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              ) : "Sign In"}
             </button>
           </form>
-        </div>
-      </div>
+
+          <p className="mt-8 text-center text-sm text-gray-400">
+            Don't have an account?{" "}
+            <Link outline="none" to="/signup" className="text-fc-emerald hover:text-fc-teal transition-colors font-medium">Create one now</Link>
+          </p>
+        </motion.div>
+      </main>
     </div>
   );
 }
