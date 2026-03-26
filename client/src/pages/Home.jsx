@@ -127,7 +127,7 @@ function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { icon: Shield, title: "1. Secure Subscription", desc: "Subscribe securely with $10/month to gain access to all draws." },
-              { icon: Trophy, title: "2. Pick Your Numbers", desc: "Choose your lucky 5 numbers (1-45) or let our system randomly select." },
+              { icon: Trophy, title: "2. Enter Your Golf Score", desc: "Choose your lucky 5 numbers (1-45) or let our system randomly select." },
               { icon: Heart, title: "3. Direct Your Impact", desc: "If you win, your pre-selected charity gets a guaranteed percentage of the pool." }
             ].map((step, idx) => (
               <motion.div key={idx} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.15 }} viewport={{ once: true }} className="premium-card p-8">

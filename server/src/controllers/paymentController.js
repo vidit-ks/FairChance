@@ -19,12 +19,12 @@ const createSubscription = async (req, res) => {
     // Insert 'pending_payment' record first
     const { data: subRec, error: subError } = await supabase
       .from("subscriptions")
-      .upsert({ 
+      .insert([{ 
         user_id: userId, 
         status: "pending_payment",
         plan_id: plan_id,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' })
+      }])
       .select()
       .single();
 

@@ -3,7 +3,7 @@ const requireAdmin = (req, res, next) => {
     return res.status(401).json({ message: "Authentication required before checking admin role" });
   }
 
-  if (req.user.role !== "admin") {
+  if (String(req.user.role || "").trim().toLowerCase() !== "admin") {
     return res.status(403).json({ message: "Access denied: Admin privileges required" });
   }
 

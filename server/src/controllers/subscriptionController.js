@@ -10,6 +10,7 @@ const createSubscription = async (req, res) => {
       .select("*")
       .eq("user_id", userId)
       .eq("status", "active")
+      .limit(1)
       .maybeSingle();
 
     if (checkError) throw checkError;
@@ -171,6 +172,7 @@ const requestOfflineSubscription = async (req, res) => {
       .select("*")
       .eq("user_id", userId)
       .in("status", ["active", "pending_approval", "pending_payment"])
+      .limit(1)
       .maybeSingle();
 
     if (existing) {
