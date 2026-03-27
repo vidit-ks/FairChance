@@ -78,8 +78,10 @@ function Admin() {
         pendingApprovals: pendingApprovalCount
       });
     } catch (error) {
-      console.error("Admin fetch error:", error);
-      toast.error("Some data failed to load.");
+      console.error("ADMIN FETCH CRITICAL FAILURE:", error);
+      if (error.status) console.error("Error Status:", error.status);
+      if (error.data) console.error("Error Payload:", error.data);
+      toast.error(`Sync failed: ${error.message || "Unknown communication error"}`);
     } finally {
       setLoading(false);
     }

@@ -36,7 +36,10 @@ const createSubscription = async (req, res) => {
 
     if (checkError) throw checkError;
     if (existing) {
-      return res.status(400).json({ message: "User already has an active subscription." });
+      return res.status(400).json({ 
+        message: "User already has an active subscription.",
+        details: `Active subscription ID: ${existing.id}`
+      });
     }
 
     const renewalDate = new Date();
@@ -155,37 +158,51 @@ const modifySubscription = async (req, res) => {
 
 const getAllSubscriptions = async (req, res) => {
   try {
+    console.log("Fetching all subscriptions...");
     const { data: subs, error: subsError } = await supabase
       .from("subscriptions")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (subsError) throw subsError;
+    if (subsError) {
+      console.error("Supabase Subscriptions Error:", subsError);
+      throw subsError;
+    }
+
+    console.log(`Found ${subs?.length || 0} subscriptions. Fetching users map...`);
 
     // Fetch users manually to avoid foreign key/embedding errors in Supabase
     const { data: users, error: usersError } = await supabase
       .from("users")
       .select("id, name, email");
 
-    if (usersError) throw usersError;
+    if (usersError) {
+      console.error("Supabase Users Map Error:", usersError);
+      throw usersError;
+    }
 
     const userMap = {};
-    users?.forEach(u => { userMap[u.id] = u; });
+    if (Array.isArray(users)) {
+      users.forEach(u => { userMap[u.id] = u; });
+    }
 
-    const subscriptionsWithUsers = subs?.map(sub => ({
+    const subscriptionsWithUsers = (Array.isArray(subs) ? subs : []).map(sub => ({
       ...sub,
-      users: userMap[sub.user_id] || { name: 'Unknown User' }
-    })) || [];
+      users: userMap[sub.user_id] || { name: 'Unknown User', email: 'N/A' }
+    }));
+
+    console.log("Returning subscriptions with mapped user data.");
 
     return res.status(200).json({
       success: true,
       subscriptions: subscriptionsWithUsers,
     });
   } catch (error) {
-    console.error("Get all subscriptions error:", error);
+    console.error("CRITICAL: Get all subscriptions error:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to fetch subscriptions",
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
