@@ -260,6 +260,7 @@ function Admin() {
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'draws', label: 'Draw Engine', icon: Ticket },
+    { id: 'requests', label: 'Subscription Requests', icon: CreditCard },
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'charities', label: 'Charities', icon: Heart },
     { id: 'verification', label: 'Winners Registry', icon: Trophy },
@@ -287,6 +288,9 @@ function Admin() {
               <item.icon className="w-4 h-4" />
               {item.label}
               {item.id === 'overview' && stats.pendingApprovals > 0 && (
+                <span className="ml-auto bg-yellow-500 text-black text-[10px] px-2 py-0.5 rounded-full font-bold">{stats.pendingApprovals}</span>
+              )}
+              {item.id === 'requests' && stats.pendingApprovals > 0 && (
                 <span className="ml-auto bg-yellow-500 text-black text-[10px] px-2 py-0.5 rounded-full font-bold">{stats.pendingApprovals}</span>
               )}
               {item.id === 'verification' && stats.pendingVerifications > 0 && (
@@ -345,15 +349,18 @@ function Admin() {
                 </div>
               </div>
 
-              {/* Pending Approvals Inbox */}
+              {/* Pending Approvals Inbox - Keeping for redundancy but adding link to main requests tab */}
               {stats.pendingApprovals > 0 && (
                 <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
-                    <h2 className="text-xl font-bold text-white">Action Required: Pending Approvals</h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
+                      <h2 className="text-xl font-bold text-white">Action Required: Pending Approvals</h2>
+                    </div>
+                    <button onClick={() => setActiveTab('requests')} className="text-xs text-fc-gold hover:underline">View All Requests</button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {allSubscriptions.filter(s => s.status === 'pending_approval').map(sub => (
+                    {allSubscriptions.filter(s => s.status === 'pending_approval').slice(0, 2).map(sub => (
                       <div key={sub.id} className="premium-card p-5 border border-yellow-500/30 bg-fc-charcoal-dark/50">
                         <div className="flex justify-between items-start mb-3">
                           <div>
@@ -369,7 +376,7 @@ function Admin() {
                         </div>
                         <div className="flex gap-2">
                           <button onClick={() => handleAdminDecideSubscription(sub.id, 'approve')} className="flex-1 bg-fc-emerald/10 text-fc-emerald hover:bg-fc-emerald hover:text-fc-charcoal border border-fc-emerald/30 py-2 rounded font-bold transition-all shadow-sm">
-                            Approve Access
+                            Approve
                           </button>
                           <button onClick={() => handleAdminDecideSubscription(sub.id, 'deny')} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/30 py-2 rounded font-bold transition-all shadow-sm">
                             Deny
@@ -478,6 +485,55 @@ function Admin() {
             </motion.div>
           )}
 
+          {/* SUBSCRIPTION REQUESTS TAB */}
+          {activeTab === 'requests' && (
+            <motion.div key="requests" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+              <h1 className="text-2xl font-bold text-white mb-6">Subscription Approval Requests</h1>
+              
+              <div className="grid grid-cols-1 gap-6">
+                {allSubscriptions.filter(s => s.status === 'pending_approval').length === 0 ? (
+                  <div className="premium-card p-12 text-center">
+                    <CheckCircle className="w-12 h-12 text-fc-emerald mx-auto mb-4 opacity-50" />
+                    <p className="text-gray-400">All caught up! No pending subscription requests.</p>
+                  </div>
+                ) : (
+                  allSubscriptions.filter(s => s.status === 'pending_approval').map(sub => (
+                    <div key={sub.id} className="premium-card p-6 border border-fc-charcoal-light flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-bold text-xl text-white">{sub.users?.name || "Unknown User"}</h3>
+                          <span className="px-3 py-1 bg-fc-gold/20 text-fc-gold text-[10px] rounded-full font-bold uppercase tracking-wider border border-fc-gold/30">
+                            {sub.plan_type} Plan
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-400 mb-4">{sub.users?.email}</p>
+                        <div className="bg-black/20 p-4 rounded-lg border-l-4 border-fc-gold">
+                          <p className="text-xs text-gray-500 uppercase font-bold mb-1">User Notes/Context</p>
+                          <p className="text-sm text-gray-300 italic">"{sub.notes || "No additional context provided."}"</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-3 w-full md:w-auto">
+                        <button 
+                          onClick={() => handleAdminDecideSubscription(sub.id, 'approve')} 
+                          className="flex-1 md:flex-none bg-fc-emerald/10 text-fc-emerald hover:bg-fc-emerald hover:text-fc-charcoal border border-fc-emerald/30 px-6 py-3 rounded-lg font-bold transition-all"
+                        >
+                          Approve Request
+                        </button>
+                        <button 
+                          onClick={() => handleAdminDecideSubscription(sub.id, 'deny')} 
+                          className="flex-1 md:flex-none bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/30 px-6 py-3 rounded-lg font-bold transition-all"
+                        >
+                          Deny
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          )}
+
           {/* USERS TAB */}
           {activeTab === 'users' && (
             <motion.div key="users" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
@@ -492,30 +548,41 @@ function Admin() {
                    return (
                      <div key={u.id} className="premium-card p-6 flex flex-col xl:flex-row gap-6">
                        
-                       <div className="xl:w-1/3">
-                         <div className="flex justify-between items-start mb-1">
-                           <h3 className="text-lg font-bold text-white">{u.name} <span className="text-xs font-normal text-gray-500 ml-2 uppercase border border-gray-600 px-2 rounded">{u.role}</span></h3>
-                           <button onClick={() => handleAdminEditUser(u)} className="text-gray-400 hover:text-white"><Edit2 className="w-4 h-4"/></button>
-                         </div>
-                         <p className="text-sm text-gray-400 mb-4">{u.email}</p>
-                         
-                         <div className="bg-fc-charcoal-dark rounded-lg p-4 border border-fc-charcoal-light">
-                           <p className="text-xs text-gray-400 mb-2 uppercase font-semibold tracking-wider">Subscription Control</p>
-                           {activeSub ? (
-                             <div>
-                               <div className="text-sm text-fc-emerald flex items-center gap-2 mb-3">
-                                 <CheckCircle className="w-4 h-4"/> Active until {new Date(activeSub.renewal_date).toLocaleDateString()}
-                               </div>
-                               <button onClick={() => handleAdminCancelUser(activeSub.id)} className="text-xs bg-red-500/10 text-red-500 hover:bg-red-500/20 px-3 py-1.5 rounded transition-colors w-full">Cancel Subscription</button>
-                             </div>
-                           ) : (
-                             <div className="flex gap-2">
-                               <button onClick={() => handleAdminSubscribeUser(u.id, 'monthly')} className="text-xs btn-primary py-1.5 px-3 flex-1">Give Mthly</button>
-                               <button onClick={() => handleAdminSubscribeUser(u.id, 'yearly')} className="text-xs btn-primary bg-fc-gold text-fc-charcoal py-1.5 px-3 flex-1">Give Yearly</button>
-                             </div>
-                           )}
-                         </div>
-                       </div>
+                        <div className="xl:w-1/3">
+                          <div className="flex justify-between items-start mb-1">
+                            <h3 className="text-lg font-bold text-white">{u.name} <span className="text-xs font-normal text-gray-500 ml-2 uppercase border border-gray-600 px-2 rounded">{u.role}</span></h3>
+                            <button onClick={() => handleAdminEditUser(u)} className="text-gray-400 hover:text-white"><Edit2 className="w-4 h-4"/></button>
+                          </div>
+                          <p className="text-sm text-gray-400 mb-2">{u.email}</p>
+                          
+                          <div className="flex flex-col gap-2 mb-4">
+                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                              <Heart className="w-3 h-3 text-fc-gold" />
+                              <span>Charity: <span className="text-white font-medium">{allCharities.find(c => c.id === u.charity_id)?.name || "Default Charity"}</span></span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                              <CreditCard className="w-3 h-3 text-fc-teal" />
+                              <span>Plan: <span className="text-white font-medium uppercase">{activeSub ? activeSub.plan_type : "No Active Plan"}</span></span>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-fc-charcoal-dark rounded-lg p-4 border border-fc-charcoal-light">
+                            <p className="text-xs text-gray-400 mb-2 uppercase font-semibold tracking-wider">Subscription Control</p>
+                            {activeSub ? (
+                              <div>
+                                <div className="text-sm text-fc-emerald flex items-center gap-2 mb-3">
+                                  <CheckCircle className="w-4 h-4"/> Active until {new Date(activeSub.renewal_date).toLocaleDateString()}
+                                </div>
+                                <button onClick={() => handleAdminCancelUser(activeSub.id)} className="text-xs bg-red-500/10 text-red-500 hover:bg-red-500/20 px-3 py-1.5 rounded transition-colors w-full flex items-center justify-center gap-2 border border-red-500/20"><Trash2 className="w-3 h-3"/> Terminate Subscription</button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-2">
+                                <button onClick={() => handleAdminSubscribeUser(u.id, 'monthly')} className="text-xs btn-primary py-1.5 px-3 flex-1">Give Mthly</button>
+                                <button onClick={() => handleAdminSubscribeUser(u.id, 'yearly')} className="text-xs btn-primary bg-fc-gold text-fc-charcoal py-1.5 px-3 flex-1">Give Yearly</button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                        
                        <div className="xl:flex-1 bg-fc-charcoal-dark rounded-lg p-4 border border-fc-charcoal-light">
                          <p className="text-xs text-gray-400 mb-3 uppercase font-semibold tracking-wider">Golf Scores ({uScores.length}/5 slots)</p>
