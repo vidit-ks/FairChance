@@ -1,95 +1,73 @@
 # FairChance - Golf Charity Subscription Platform
 
-**Overview**
+FairChance
 
-FairChance is a production-style SaaS platform built to demonstrate real-world system design, combining subscription management, secure payment processing, and role-based access control.
+A full-stack subscription platform with secure payment integration, role-based access control, and scalable architecture.
 
-The platform delivers a seamless and scalable user experience, enabling users to manage subscriptions and interact with a dynamic dashboard, while administrators maintain full control over platform operations.
+Live: https://fair-chance-nine.vercel.app/
 
-🎯 **Key Highlights**
-💳 Secure Payment Integration — Implemented Razorpay with payment verification and webhook synchronization
-🔄 Hybrid Subscription System — Supports automated payments + manual admin approval workflow
-📊 Dynamic Dashboard — Real-time subscription tracking with optimized data handling (latest 5 logic)
-🛠️ Admin Command Center — Centralized control over users, subscriptions, and approvals
-⚡ Scalable Backend Design — Built with RESTful APIs and modular architecture
-🎨 Modern UI/UX — Clean, responsive interface using Tailwind CSS
-🧠 Core Functionality
+Repository: https://github.com/vidit-ks/FairChance
 
-**FairChance enables users to**:
+Overview
 
-Activate and manage subscriptions seamlessly
+FairChance is a production-oriented SaaS platform designed to demonstrate real-world system design, combining subscription management, payment processing, and administrative control.
+
+The platform enables users to activate subscriptions, manage their activity through a dashboard, and interact with a structured system, while administrators retain centralized control over access and operations.
+
+Key Features
+Subscription System: Supports monthly and yearly plans with both automated payment activation and manual admin approval
+Payment Integration: Razorpay-based checkout with secure verification and backend synchronization
+User Dashboard: Real-time subscription tracking with optimized data handling (latest 5 records logic)
+Admin Control Panel: Manage users, approve or deny requests, and monitor platform activity
+Backend Architecture: RESTful APIs with middleware for authentication, authorization, and access control
+Modern UI: Responsive interface built with React and Tailwind CSS
+Core Functionality
+
+Users can:
+
+Activate and manage subscriptions
 Track subscription status in real time
 Interact with a structured scoring system
-Experience a smooth in-app payment flow
+Access features based on subscription state
 
-The system enforces efficient data constraints, maintaining only the most relevant user data for performance and consistency.
+The system enforces efficient data constraints, maintaining only the most relevant records per user to ensure performance and consistency.
 
-💳 **Subscription & Payment Flow**
+Subscription and Payment Flow
 
-The platform implements a dual-layer subscription model:
+Automated Flow
 
-🔹 **Automated Flow**
-Razorpay checkout integration
-Secure transaction verification
-Webhook-based backend synchronization
-Instant subscription activation
-🔹 **Manual Flow**
-Offline subscription request system
-Admin approval/rejection mechanism
-Controlled activation with lifecycle management
+User initiates payment through Razorpay
+Payment is verified securely
+Backend updates subscription status
+Dashboard unlocks automatically
 
-🛠️ **Admin Command Center**
-**The administrative system provides:**
-Centralized user and subscription management
-Real-time monitoring of platform activity
-Approval/denial workflows for subscription requests
-Granular access control for all users
+Manual Flow
 
-
-⚙️ **System Architecture**
-
+User requests offline approval
+Admin reviews and approves or rejects
+Subscription is activated with defined validity
+System Architecture
 Frontend (React + Tailwind)
         ↓
-Backend (Node.js + Express APIs)
+Backend (Node.js + Express)
         ↓
 Database (Supabase)
         ↓
 Payment Gateway (Razorpay)
 
-The architecture follows a modular and scalable design, aligned with real-world production systems.
+The system follows a modular and scalable design, aligned with real-world backend and API practices.
 
-
-
-🔐 **Security & Reliability**
-
-Environment-based configuration for sensitive data
-Secure payment verification and validation
+Security and Reliability
+Sensitive data managed through environment variables
+Secure payment verification implemented
 Role-based access control for protected routes
-Middleware-driven authorization and request handling
+Middleware-driven request validation
+Project Highlights
+Built a complete full-stack application with real-world architecture
+Integrated a third-party payment gateway with verification and lifecycle handling
+Designed a hybrid subscription model (automated + manual)
+Developed admin-driven workflows for controlled access
+Author
 
-
-🎨 **UI Philosophy**
-
-FairChance follows a modern and minimal design approach, focusing on:
-
-Clarity and usability
-Smooth navigation and transitions
-Responsive and adaptive layouts
-Consistent visual hierarchy
-
-
-📌 **Project Impact**
-
-FairChance demonstrates the ability to:
-
-Build a real-world SaaS platform from scratch
-Integrate third-party payment systems securely
-Design scalable backend architecture
-Develop intuitive and modern frontend interfaces
-
-
-**Author**
 Vidit Kumar Singh
-Full-Stack Developer | AI & Cloud Enthusiast
-
-<p align="center"> ⭐ <b>If you like this project, consider giving it a star!</b> </p>
+Full-Stack Developer
