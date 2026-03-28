@@ -72,7 +72,8 @@ Webhook-ready architecture for real-time updates
 
 **Subscription Flow**
 
-Automated Payment Flow
+**Automated Payment Flow**
+
 User clicks "Activate Plan"
         ↓
 Backend creates Razorpay order
