@@ -1,73 +1,132 @@
 # FairChance - Golf Charity Subscription Platform
 
-FairChance
+**FairChance**
 
-A full-stack subscription platform with secure payment integration, role-based access control, and scalable architecture.
+A full-stack subscription platform built with secure payment integration, role-based access control, and scalable backend architecture, designed to simulate a real-world SaaS system.
 
-Live: https://fair-chance-nine.vercel.app/
+📖 **Overview**
 
-Repository: https://github.com/vidit-ks/FairChance
+FairChance is a production-style SaaS platform that combines subscription management, payment processing, and administrative control into a unified system.
 
-Overview
+The platform enables users to subscribe, manage their activity, and interact with a structured dashboard, while administrators maintain centralized control over user access and platform operations.
 
-FairChance is a production-oriented SaaS platform designed to demonstrate real-world system design, combining subscription management, payment processing, and administrative control.
+It is designed with a strong focus on:
 
-The platform enables users to activate subscriptions, manage their activity through a dashboard, and interact with a structured system, while administrators retain centralized control over access and operations.
+real-world architecture
+secure payment workflows
+scalable backend logic
+clean and responsive UI
 
-Key Features
-Subscription System: Supports monthly and yearly plans with both automated payment activation and manual admin approval
-Payment Integration: Razorpay-based checkout with secure verification and backend synchronization
-User Dashboard: Real-time subscription tracking with optimized data handling (latest 5 records logic)
-Admin Control Panel: Manage users, approve or deny requests, and monitor platform activity
-Backend Architecture: RESTful APIs with middleware for authentication, authorization, and access control
-Modern UI: Responsive interface built with React and Tailwind CSS
-Core Functionality
 
-Users can:
+⚙️**System Architecture**
 
-Activate and manage subscriptions
-Track subscription status in real time
-Interact with a structured scoring system
-Access features based on subscription state
+        User Interface (React + Tailwind)
+                    │
+                    ▼
+        API Layer (Node.js + Express)
+                    │
+                    ▼
+        Database (Supabase)
+                    │
+                    ▼
+        Payment Gateway (Razorpay)
 
-The system enforces efficient data constraints, maintaining only the most relevant records per user to ensure performance and consistency.
+Key idea: Each layer is modular and independent, making the system scalable and maintainable.
 
-Subscription and Payment Flow
+**Core Features**
 
-Automated Flow
+🔐 **Authentication & Roles**
 
-User initiates payment through Razorpay
-Payment is verified securely
-Backend updates subscription status
-Dashboard unlocks automatically
+Secure login/signup system
+Role-based access (User / Admin)
+Protected routes using middleware
 
-Manual Flow
+💳 **Subscription System**
+Monthly and yearly plans
+Dual flow:
+Automated payment (Razorpay)
+Manual admin approval
+Subscription states:
+inactive
+pending_payment
+pending_approval
+active
 
-User requests offline approval
-Admin reviews and approves or rejects
-Subscription is activated with defined validity
-System Architecture
-Frontend (React + Tailwind)
+📊** User Dashboard**
+Real-time subscription tracking
+Score management system
+Latest 5 records logic (optimized data storage)
+Dynamic UI updates based on user state
+
+🛠️**Admin Command Center**
+View and manage all users
+Approve or reject subscription requests
+Monitor subscription states and activity
+Control access to platform features
+
+💰 **Payment Integration**
+Razorpay checkout (test mode)
+Secure payment verification
+Backend-controlled activation logic
+Webhook-ready architecture for real-time updates
+
+**Subscription Flow**
+
+Automated Payment Flow
+User clicks "Activate Plan"
         ↓
-Backend (Node.js + Express)
+Backend creates Razorpay order
         ↓
-Database (Supabase)
+Razorpay Checkout opens
         ↓
-Payment Gateway (Razorpay)
+Payment Success
+        ↓
+Backend verifies payment
+        ↓
+Subscription → ACTIVE
+        ↓
+Dashboard unlocked
 
-The system follows a modular and scalable design, aligned with real-world backend and API practices.
 
-Security and Reliability
-Sensitive data managed through environment variables
-Secure payment verification implemented
-Role-based access control for protected routes
-Middleware-driven request validation
-Project Highlights
-Built a complete full-stack application with real-world architecture
-Integrated a third-party payment gateway with verification and lifecycle handling
-Designed a hybrid subscription model (automated + manual)
-Developed admin-driven workflows for controlled access
-Author
+**Manual Approval Flow**
 
+User requests subscription
+        ↓
+Status → PENDING_APPROVAL
+        ↓
+Admin reviews request
+        ↓
+Admin approves
+        ↓
+Subscription → ACTIVE
+
+
+📊 **Data Handling Strategy**
+
+Only latest 5 records per user are stored
+Prevents unnecessary data growth
+Ensures consistent performance and faster queries
+Maintains relevance of user activity
+
+
+🔐 **Security & Reliability**
+
+Sensitive data handled via environment variables
+Payment verification ensures transaction authenticity
+Role-based access control protects critical routes
+Middleware enforces subscription-based restrictions
+
+
+🎨 **UI & Experience**
+
+The platform follows a clean and modern design philosophy:
+
+Minimal clutter with strong visual hierarchy
+Responsive layout across devices
+Smooth navigation and state transitions
+Dashboard-focused user experience
+
+
+👨‍💻 **Author**
 Vidit Kumar Singh
 Full-Stack Developer
