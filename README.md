@@ -1,58 +1,95 @@
 # FairChance - Golf Charity Subscription Platform
 
-FairChance is a premium, subscription-driven web application combining golf performance tracking, charitable fundraising, and a monthly draw-based reward engine. Designed to fulfill the Digital Heroes Full-Stack PRD, the platform features an emotionally engaging, modern aesthetic that intentionally avoids traditional golf design clichés.
+<p align="center"> <b>A modern full-stack subscription platform with secure payments, admin control, and scalable architecture.</b> </p> <p align="center"> <a href="https://fair-chance-nine.vercel.app/">🌐 Live Demo</a> • <a href="https://github.com/vidit-ks/FairChance">📦 Repository</a> </p>
+✨ Overview
 
-## 🚀 Core Features
+FairChance is a production-style SaaS platform built to demonstrate real-world system design, combining subscription management, secure payment processing, and role-based user control.
 
-- **Subscription Engine:** Support for both Monthly ($10) and Yearly ($100) plans. The entire platform is guarded by real-time subscription validation middleware, restricting inactive users from participating in draws or adding scores.
-- **Golf Score Tracking:** Users register their 5 most recent golf scores in Stableford format (1–45). The database automatically prunes older scores to maintain exactly the latest 5 entries in reverse-chronological order.
-- **Draw & Reward System:** A robust monthly draw engine (Random vs. Algorithmic modes) where users match 3, 4, or 5 numbers. Jackpots roll over automatically if no one hits a perfect 5-number match.
-- **Charity Integration:** 10% of every subscription inherently goes to a registered charity. Users are required to select a specific foundation during the Signup flow, tying their real-world impact directly to their account.
-- **Administrative Command Center:** A powerful, tabbed dashboard exclusively for Admins featuring KPI metrics, Draw Engine triggers, full User editing (scores & subscriptions overrides), Charity CRUD management, and a Winner Verification Queue for processing screenshot layouts.
+The platform delivers a seamless experience where users can activate subscriptions, manage their activity, and interact with a dynamic dashboard, while administrators maintain full control over platform operations.
 
-## 🛠 Architecture & Tech Stack
+Designed with scalability and reliability in mind, FairChance integrates modern UI/UX practices with robust backend logic, ensuring a smooth and secure user journey.
 
-**Frontend:** React (Vite), TailwindCSS v3 (Custom Dark Theme Tokens), Framer Motion, JSX, React Hot Toast
-**Backend:** Node.js, Express.js, Custom Middleware Authentication 
-**Database/Auth:** Supabase (PostgreSQL), JWT, Bcrypt
+🎯 Key Highlights
+💳 Integrated Payment System
+Secure Razorpay integration with verification and webhook-based synchronization
+🔄 Hybrid Subscription Flow
+Supports both automated payment activation and manual admin approval
+📊 Dynamic User Dashboard
+Real-time subscription tracking and optimized data handling
+🛠️ Admin Command Center
+Full control over users, approvals, and platform activity
+⚡ Optimized Backend Logic
+Efficient data constraints (latest 5 records logic) and scalable API design
+🎨 Modern UI/UX
+Clean, responsive interface built with Tailwind CSS
+🧠 Core Functionality
 
-## 💻 Local Development Setup
+FairChance enables users to:
 
-### 1. Supabase Initialization
-Create a Supabase project and run the provided SQL migration scripts to construct the `users`, `subscriptions`, `draws`, `charities`, `scores`, and `winners` tables.
+Activate and manage subscriptions seamlessly
+Track subscription status in real time
+Interact with a structured scoring system
+Experience a smooth, in-app payment flow
 
-### 2. Backend Environment Configuration
-Create a `.env` file in the `/server` directory:
-```env
-PORT=5000
-JWT_SECRET=your_super_secret_jwt_key
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+The system enforces optimized data handling by maintaining only the most relevant user data, ensuring performance and consistency.
 
-### 3. Frontend Environment Configuration
-Create a `.env.local` file in the `/client` directory:
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-*(If deployed, point this to your Render/Vercel backend instance).*
+💳 Subscription & Payment Flow
 
-### 4. Running Locally
-Initialize two terminal instances to run the environments concurrently.
+The platform implements a dual-layer subscription model:
 
-**Terminal 1 (Backend - Express):**
-```bash
-cd server
-npm install
-npm run dev
-```
+🔹 Automated Flow
+Payment processed via Razorpay
+Secure verification of transactions
+Webhook-based backend synchronization
+Instant subscription activation
+🔹 Manual Flow
+Users can request offline approval
+Admin reviews and approves/denies requests
+Controlled activation with defined subscription lifecycle
 
-**Terminal 2 (Frontend - React):**
-```bash
-cd client
-npm install
-npm run dev
-```
+This approach ensures both automation and flexibility.
 
----
-*Built as a Full-Stack Assessment Delivery for Digital Heroes by Vidit Kumar Singh.*
+🛠️ Admin Command Center
+
+The administrative system provides:
+
+Centralized user and subscription management
+Real-time visibility of platform activity
+Approval/denial workflows for subscription requests
+Controlled access management for all users
+⚙️ System Architecture
+Frontend (React + Tailwind)
+        ↓
+Backend (Node.js + Express APIs)
+        ↓
+Database (Supabase)
+        ↓
+Payment Gateway (Razorpay)
+
+The architecture is modular and scalable, following real-world production patterns.
+
+🔐 Security & Reliability
+Environment-based configuration for sensitive data
+Secure payment verification mechanisms
+Role-based access control for protected routes
+Middleware-driven validation and authorization
+🎨 UI Philosophy
+
+FairChance follows a clean, modern, and minimal design approach, focusing on:
+
+clarity and usability
+smooth navigation
+responsive layouts
+consistent visual hierarchy
+📌 Project Impact
+
+FairChance demonstrates the ability to:
+
+design and implement a real-world SaaS platform
+integrate third-party payment systems securely
+build scalable backend services
+create intuitive and modern frontend experiences
+👨‍💻 Author
+
+Vidit Kumar Singh
+Full-Stack Developer | AI & Cloud Enthusiast
